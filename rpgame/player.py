@@ -44,6 +44,11 @@ class Player(object):
     def equip_items(self, equip_item: item.Item = None):
         """ Equips an item on the player so they're ready to fight """
         if equip_item is not None:
+            for item in self.items:
+                if item.equip_slot == equip_item.equip_slot:
+                    self.items.remove(item)
+                    self.items.append(equip_item)
+
             self.items.append(equip_item)
 
     def __str__(self):

@@ -1,5 +1,5 @@
 from rpgame import combat, player
-from rpgame.item import Item
+from rpgame.item import Item, ItemSlot
 
 if __name__ == '__main__':
     party = []
@@ -7,12 +7,12 @@ if __name__ == '__main__':
     player_1 = player.Player('Osiris')
     party.append(player_1)
 
-    player_1.equip_items(Item(name='bastard sword', attack_power=9, crit_chance=.03))
-    player_1.equip_items(Item(name='hauberk of steel', attack_power=4, crit_chance=.02))
-    player_1.equip_items(Item(name='bracers of handsomeness', attack_power=10, crit_chance=.01))
-    player_1.equip_items(Item(name='cowl of the batman', attack_power=5, crit_chance=.02))
-    player_1.equip_items(Item(name='slap-master sabatons', attack_power=4, crit_chance=.03))
-    player_1.equip_items(Item(name='coif of vandals', attack_power=14, crit_chance=.035))
+    player_1.equip_items(Item(name='bastard sword', attack_power=9, crit_chance=.03, slot=ItemSlot.BOTH_HAND))
+    player_1.equip_items(Item(name='hauberk of steel', attack_power=4, crit_chance=.02, slot=ItemSlot.CHEST))
+    player_1.equip_items(Item(name='bracers of handsomeness', attack_power=10, crit_chance=.01, slot=ItemSlot.WRIST))
+    player_1.equip_items(Item(name='cowl of the batman', attack_power=5, crit_chance=.02, slot=ItemSlot.HEAD))
+    player_1.equip_items(Item(name='slap-master sabatons', attack_power=4, crit_chance=.03, slot=ItemSlot.FEET))
+    player_1.equip_items(Item(name='small cloak of vandals', attack_power=14, crit_chance=.035, slot=ItemSlot.BACK))
 
     player_2 = player.Player('Sandy')
     party.append(player_2)
@@ -39,7 +39,7 @@ if __name__ == '__main__':
 
     print()
     print()
-    for i in range(0, 10):
+    for i in range(0, 300):
         enemy = None
         fight = None
         enemy = combat.get_random_enemy()
