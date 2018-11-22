@@ -17,7 +17,8 @@ class ItemSlot(Enum):
 
 
 class Item(object):
-    def __init__(self, name: str, attack_power: int, crit_chance: float = 0.0, slot: ItemSlot = ItemSlot.NONE):
+    def __init__(self,id: int, name: str, attack_power: int, crit_chance: float = 0.0, slot: ItemSlot = ItemSlot.NONE):
+        self.id = id
         self.name = name
         self.attack_power = attack_power
         self.crit_chance: float = crit_chance

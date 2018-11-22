@@ -39,8 +39,8 @@ class Fight(object):
     def start_fight(self, file_path: str = None):
         self.is_fight_active = True
         while self.enemy.alive:
-            party_member: int = random.randint(1, len(self.party)) - 1
-            f_player: player.Player = self.party[party_member]
+            party_member: int = random.randint(1, len(self.party.members)) - 1
+            f_player: player.Player = self.party.members[party_member]
 
             attack = Attack(f_player, self.enemy)
             self.attacks.append(attack)

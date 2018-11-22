@@ -3,15 +3,15 @@ from rpgame import item
 
 class Player(object):
 
-    def __init__(self, name: str):
+    def __init__(self, name: str, level: int= 1):
         self.name: str = name
-        self._level: int = 1
+        self._level: int = level
         self._base_min_damage: int = 2
         self._base_max_damage: int = 8
         self._min_damage: int = 1
         self._max_damage: int = 8
-        self.critical_chance_base: float = .08
-        self._critical_chance: float = .08
+        self.critical_chance_base: float = .05
+        self._critical_chance: float = .05
         self.critical_multiplier: float = 2.5
         self.miss_chance: float = .05
         self.items: [] = []
@@ -20,7 +20,7 @@ class Player(object):
     def min_damage(self) -> int:
         result = self._base_min_damage
         for e_item in self.items:
-            result += round(e_item.attack_power / 5.8)
+            result += round(e_item.attack_power / 4.75)
 
         # self._min_damage = result
         return result
@@ -38,6 +38,8 @@ class Player(object):
         result: float = self.critical_chance_base
         for e_item in self.items:
             result += e_item.crit_chance
+
+        result = int(result * 100) * .01
 
         return result
 

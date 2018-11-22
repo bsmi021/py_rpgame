@@ -1,0 +1,28 @@
+id|name|attack_power|crit_chance|slot
+1|bastard sword|9|.03|11
+2|haurbek of steel|4|.02|2
+3|bracers of steel|10|.01|5
+4|cowl of steel|5|.01|1
+5|steel sabatons|4|.03|7
+6|small cloak of vandals|14|.035|8
+7|juggernaut maul|12|.05|11
+8|breastplate of might|6|.04|2
+9|bracers of might|11|.01|5
+10|cask of might|6|.02|1
+11|boots of might|5|.01|7
+12|death-dealer's great cloak|16|.02|8
+13|thunderfury|26|.08|11
+14|judgement chestguard|6|.04|2
+15|judgement bracers|8|.02|5
+16|hood of judgement|9|.04|1
+17|judgement sabatons|7|.02|7
+18|light-bearer's shawl|6|.03|8
+19|judgement spaulders|8|.01|3
+20|spaulders of might|9|.01|3
+21|bischoff's shoulder pads|7|.01|3
+22|kilt of Thompson|5|.015|4
+23|judgement legplates|6|.02|4
+24|greaves of might|6|.02|4
+25|mcmahon's loaded gloves|3|.005|6
+26|judgement hand guards|4|.01|6
+27|gloves of might|4|.0125|6

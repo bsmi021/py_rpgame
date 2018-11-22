@@ -1,48 +1,110 @@
+import csv
+import random
+from collections import namedtuple
+
 from rpgame import combat, player
 from rpgame.item import Item, ItemSlot
 
+
+def return_0_if_none(value_check):
+    """ General function to return 0 if an int is null """
+    if value_check is None or value_check is '':
+        return 0
+    else:
+        return value_check
+
+
 if __name__ == '__main__':
-    party = []
 
-    player_1 = player.Player('Osiris')
-    party.append(player_1)
+    data = []
+    players: [] = []
+    parties: [] = []
+    enemies: [] = []
+    items = []
 
-    player_1.equip_items(Item(name='bastard sword', attack_power=9, crit_chance=.03, slot=ItemSlot.BOTH_HAND))
-    player_1.equip_items(Item(name='hauberk of steel', attack_power=4, crit_chance=.02, slot=ItemSlot.CHEST))
-    player_1.equip_items(Item(name='bracers of handsomeness', attack_power=10, crit_chance=.01, slot=ItemSlot.WRIST))
-    player_1.equip_items(Item(name='cowl of the batman', attack_power=5, crit_chance=.02, slot=ItemSlot.HEAD))
-    player_1.equip_items(Item(name='slap-master sabatons', attack_power=4, crit_chance=.03, slot=ItemSlot.FEET))
-    player_1.equip_items(Item(name='small cloak of vandals', attack_power=14, crit_chance=.035, slot=ItemSlot.BACK))
+    player_fields = 'id', 'name', 'level', 'head', 'chest', 'shoulders', 'legs', \
+                    'wrist', 'hands', 'feet', 'back', 'main_hand', \
+                    'off_hand', 'both_hand'
 
-    player_2 = player.Player('Sandy')
-    party.append(player_2)
-    player_2.equip_items(Item(name='juggernaut maul', attack_power=12, crit_chance=.05))
-    player_2.equip_items(Item(name='breastplate of might', attack_power=6, crit_chance=.04))
-    player_2.equip_items(Item(name='bracers of might', attack_power=11, crit_chance=.01))
-    player_2.equip_items(Item(name='cask of might', attack_power=6, crit_chance=.02))
-    player_2.equip_items(Item(name='boots of might', attack_power=5, crit_chance=.01))
-    player_2.equip_items(Item(name='death-dealer\'s great cloak', attack_power=16, crit_chance=.02))
+    player_item = namedtuple('player_item', " ".join(player_fields))
 
-    player_3 = player.Player('Oliver')
-    party.append(player_3)
-    player_3.equip_items(Item(name='thunder fury', attack_power=26, crit_chance=.08))
-    player_3.equip_items(Item(name='judgement chest guard', attack_power=6, crit_chance=.04))
-    player_3.equip_items(Item(name='judgement bracers', attack_power=8, crit_chance=.02))
-    player_3.equip_items(Item(name='hood of judgement', attack_power=9, crit_chance=.04))
-    player_3.equip_items(Item(name='judgement sabatons', attack_power=7, crit_chance=.02))
-    player_3.equip_items(Item(name='light-bearer shawl', attack_power=6, crit_chance=.03))
+    with open('..\\data\\items.txt', 'r', newline='') as infile:
+        reader = csv.reader(infile, delimiter='|')
+        for row in reader:
+            if row[0].strip() == "id":
+                continue
 
-    enemies = []
+            item = Item(id=int(row[0]),
+                        name=row[1].strip(),
+                        attack_power=int(return_0_if_none(row[2].strip())),
+                        crit_chance=float(row[3]),
+                        slot=ItemSlot(int(row[4])))
+            items.append(item)
 
-    for player in party:
-        print(player)
+    with open('..\\data\\players.txt', 'r', newline='') as infile:
+        reader = csv.reader(infile, delimiter='|')
+        # get names from column headers
+        for row in reader:
+            # print(row)
+            if row[0].strip() == 'id':
+                continue
+            data.append(player_item(id=int(row[0].strip()),
+                                    name=row[1].strip(),
+                                    level=int(row[2].strip()),
+                                    head=return_0_if_none(row[3]),
+                                    chest=return_0_if_none(row[4]),
+                                    shoulders=return_0_if_none(row[5]),
+                                    legs=return_0_if_none(row[6]),
+                                    wrist=return_0_if_none(row[7]),
+                                    hands=return_0_if_none(row[8]),
+                                    feet=return_0_if_none(row[9]),
+                                    back=return_0_if_none(row[10]),
+                                    main_hand=return_0_if_none(row[11]),
+                                    off_hand=return_0_if_none(row[12]),
+                                    both_hand=return_0_if_none(row[13])
+                                    ))
+
+    for p_data in data:
+        playr = player.Player(name=p_data.name, level=p_data.level)
+        playr.equip_items(items[int(p_data.head) - 1])
+        playr.equip_items(items[int(p_data.chest) - 1])
+        playr.equip_items(items[int(p_data.shoulders) - 1])
+        playr.equip_items(items[int(p_data.legs) - 1])
+        playr.equip_items(items[int(p_data.wrist) - 1])
+        playr.equip_items(items[int(p_data.hands) - 1])
+        playr.equip_items(items[int(p_data.feet) - 1])
+        playr.equip_items(items[int(p_data.back) - 1])
+        playr.equip_items(items[int(p_data.both_hand) - 1])
+        players.append(playr)
+
+    # create parties for the players, players are selected randomly
+    for i in range(5):
+        party = player.Party('Party')
+        parties.append(party)
+        while len(players) > 0 \
+                and len(party.members) <= 3:
+            party.add_party_member(players.pop(random.randint(0, len(players) - 1)))
+
+    # print out the party members
+    for party in parties:
+        print()
+        print(party.name)
+        for player in party.members:
+            print(player)
 
     print()
     print()
-    for i in range(0, 300):
+    """ Simulate 25 fights:
+            Create a random Enemy
+            Select one of the parties from the parties list
+            Create a fight object (file_path will write the combat log
+            Get the fight summary on the screen
+    """
+    for i in range(0, 3000):
         enemy = None
         fight = None
         enemy = combat.get_random_enemy()
+        party = parties[random.randint(0, len(parties) - 1)]
         fight = combat.Fight(party, enemy)
         fight.start_fight(file_path='..\data\combat_log.out')
-        fight.get_fight_summary()
+        #fight.get_fight_summary()
