@@ -15,7 +15,7 @@ PACKAGES = find_packages(exclude=['test', 'tests.*'])
 
 REQUIRES = [
     'pytz>=2018.04',
-    'confluent_kafka'
+    'confluent_kafka>=0.11.6'
 ]
 
 setup(
