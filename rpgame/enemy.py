@@ -56,7 +56,7 @@ class Enemy(object):
 
 class Troll(Enemy):
     def __init__(self, name: str, level: int = 1):
-        super().__init__(name=name, lives=1, hit_points=165, level=level, can_block=True)
+        super().__init__(name=name, lives=1, hit_points=365, level=level, can_block=True)
 
     def grunt(self):
         """ Makes him say his name"""
@@ -65,9 +65,9 @@ class Troll(Enemy):
 
 class Orc(Enemy):
     def __init__(self, name: str, level: int):
-        super().__init__(name=name, lives=3, hit_points=285, level=level, can_dodge=True, can_block=True)
+        super().__init__(name=name, lives=3, hit_points=485, level=level, can_dodge=True, can_block=True)
 
 
 class Vampire(Enemy):
     def __init__(self, name: str, level: int):
-        super().__init__(name=name, lives=3, hit_points=117, level=level, can_dodge=True, can_rebirth=False)
+        super().__init__(name=name, lives=3, hit_points=317, level=level, can_dodge=True, can_rebirth=False)

@@ -2,6 +2,7 @@ import datetime
 import random
 import time
 
+import confluent_kafka
 import pytz
 
 from rpgame import enemy, player
@@ -36,7 +37,13 @@ class Fight(object):
         self.attacks: [] = []
         self.is_fight_active: bool = False
 
-    def start_fight(self, file_path: str = None):
+    def kafka_produce_report(self, err, msg):
+        if err is not None:
+            print('Message delivery failed: {}'.format(err))
+        else:
+            print('Message delivered to {} [{}]'.format(msg.topic(), msg.partition()))
+
+    def start_fight(self, file_path: str = None, send_to_kafka: bool = False):
         self.is_fight_active = True
         while self.enemy.alive:
             party_member: int = random.randint(1, len(self.party.members)) - 1
@@ -45,10 +52,16 @@ class Fight(object):
             attack = Attack(f_player, self.enemy)
             self.attacks.append(attack)
             # put an artificial break in the action
-            time.sleep(random.randint(0, 25) * .01)
+            time.sleep(random.randint(0, 35) * .01)
             attack.execute_attack()
-            if file_path is None:
+            if file_path is None and not send_to_kafka:
                 print(attack.get_log_entry())
+            elif send_to_kafka:
+                producer = confluent_kafka.Producer({'bootstrap.servers': '18.235.75.135'})
+                kafka_topic: str = 'rpggame2_combat_log'
+
+                kafka_message = attack.get_log_entry().rstrip('\n').strip().encode('utf-8')
+                producer.produce(kafka_topic, kafka_message, callback=self.kafka_produce_report)
             else:
                 with open(file_path, 'a') as log_file:
                     print(attack.get_log_entry(), file=log_file)
