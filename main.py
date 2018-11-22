@@ -28,7 +28,7 @@ if __name__ == '__main__':
 
     player_item = namedtuple('player_item', " ".join(player_fields))
 
-    with open('..\\data\\items.txt', 'r', newline='') as infile:
+    with open('data\\items.txt', 'r', newline='') as infile:
         reader = csv.reader(infile, delimiter='|')
         for row in reader:
             if row[0].strip() == "id":
@@ -41,7 +41,7 @@ if __name__ == '__main__':
                         slot=ItemSlot(int(row[4])))
             items.append(item)
 
-    with open('..\\data\\players.txt', 'r', newline='') as infile:
+    with open('data\\players.txt', 'r', newline='') as infile:
         reader = csv.reader(infile, delimiter='|')
         # get names from column headers
         for row in reader:
@@ -106,5 +106,5 @@ if __name__ == '__main__':
         enemy = combat.get_random_enemy()
         party = parties[random.randint(0, len(parties) - 1)]
         fight = combat.Fight(party, enemy)
-        fight.start_fight(file_path='..\data\combat_log.out')
+        fight.start_fight(send_to_kafka=True)#file_path='..\data\combat_log.out')
         #fight.get_fight_summary()
