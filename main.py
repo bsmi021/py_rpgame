@@ -11,13 +11,16 @@ from rpgame.utils import return_0_if_none, kafka_produce_message, kafka_get_prod
 
 def run_fight_sim(f_fight: combat.Fight, f_send_to_kafka: bool):
     """ Executes the fight logic allowing multiple fights to occur at once"""
-    print(f_fight.start_fight(send_to_kafka=f_send_to_kafka, file_path=None))
+    if f_send_to_kafka:
+        f_producer = kafka_get_producer()
+    print(f_fight.start_fight(send_to_kafka=f_send_to_kafka, file_path=None, producer=f_producer))
 
 
 if __name__ == '__main__':
 
     fight_count = 30
     send_to_kafka = True
+    kafka_producer = None
 
     if send_to_kafka:
         kafka_producer = kafka_get_producer()

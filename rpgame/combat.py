@@ -67,7 +67,7 @@ class Fight(object):
                       }
         return jsonpickle.encode(attack_obj, unpicklable=False)
 
-    def start_fight(self, file_path: str = None, send_to_kafka: bool = False):
+    def start_fight(self, file_path: str = None, send_to_kafka: bool = False, producer = None):
         self.is_fight_active = True
         while self.enemy.alive:
             party_member: int = random.randint(1, len(self.party.members)) - 1
@@ -81,7 +81,7 @@ class Fight(object):
             if file_path is None and not send_to_kafka:
                 print(self.get_attack_json(attack))
             elif send_to_kafka:
-                producer = rpgame.utils.kafka_get_producer()
+                # producer = rpgame.utils.kafka_get_producer()
                 rpgame.utils.kafka_produce_message(producer, rpgame.utils.attack_topic, self.get_attack_json(attack))
 
             else:
