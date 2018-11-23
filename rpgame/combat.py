@@ -1,47 +1,71 @@
 import datetime
 import random
 import time
+import uuid
 
-import confluent_kafka
+import jsonpickle
 import pytz
 
+import rpgame.utils
 from rpgame import enemy, player
 
 
 def get_attack_time():
     """ returns the timestamp of the attack"""
-    utc_time = datetime.datetime.utcnow()
-    return pytz.utc.localize(utc_time).astimezone()
+    return rpgame.utils.get_localized_time()
 
 
 def get_random_enemy() -> enemy.Enemy:
     enemy_rand = random.randint(1, 3)
 
     if enemy_rand == 2:
-        i_enemy = enemy.Vampire(name='Vampire_{}'.format(hash(str(random.randint(0, 10000000)) + 'V')),
-                                level=random.randint(1, 3))
+        i_enemy = enemy.Gnoll(name='Gnoll', level=random.randint(1, 5))
     elif enemy_rand == 3:
-        i_enemy = enemy.Orc(name='Orc_{}'.format(hash(str(random.randint(0, 10000000)) + 'O')),
-                            level=random.randint(1, 5))
+        i_enemy = enemy.Orc(name='Orc', level=random.randint(1, 5))
     else:
-        i_enemy = enemy.Troll(name='Troll_{}'.format(hash(str(random.randint(0, 10000000)) + 'T')),
-                              level=random.randint(1, 3))
+        i_enemy = enemy.Troll(name='Troll', level=random.randint(1, 5))
 
     return i_enemy
 
 
 class Fight(object):
     def __init__(self, party: player.Party, enemy: enemy.Enemy):
+        self.id = hash(uuid.uuid4())
         self.party = party
         self.enemy = enemy
         self.attacks: [] = []
         self.is_fight_active: bool = False
+        self.cr_date = rpgame.utils.get_localized_time()
 
     def kafka_produce_report(self, err, msg):
         if err is not None:
             print('Message delivery failed: {}'.format(err))
         else:
             print('Message delivered to {} [{}]'.format(msg.topic(), msg.partition()))
+
+    def get_attack_json(self, attack):
+        attack_obj = {'event_time': attack.event_time,
+                      'fight_id': self.id,
+                      'party_id': self.party.id,
+                      'player_id': attack.player.id,
+                      'player_instance_id': attack.player.instance_id,
+                      'player_name': attack.player.name,
+                      'enemy_id': attack.enemy.id,
+                      'enemy_name': attack.enemy.name,
+                      'enemy_base_hp': attack.enemy.original_hit_points,
+                      'enemy_prev_hp': attack.enemy.previous_hp,
+                      'enemy_hp': attack.enemy.hit_points,
+                      'base_attack_amt': attack._base_attack,
+                      'attack_amt': attack.player_attack_amount,
+                      'blocked_amt': attack.amount_blocked,
+                      'overkill_amt': attack.overkill,
+                      'critical': attack.was_critical,
+                      'missed': attack.was_missed,
+                      'blocked': attack.was_blocked,
+                      'dodged': attack.was_dodged,
+                      'enemy_is_dead': attack.is_dead
+                      }
+        return jsonpickle.encode(attack_obj, unpicklable=False)
 
     def start_fight(self, file_path: str = None, send_to_kafka: bool = False):
         self.is_fight_active = True
@@ -55,18 +79,17 @@ class Fight(object):
             time.sleep(random.randint(0, 35) * .01)
             attack.execute_attack()
             if file_path is None and not send_to_kafka:
-                print(attack.get_log_entry())
+                print(self.get_attack_json(attack))
             elif send_to_kafka:
-                producer = confluent_kafka.Producer({'bootstrap.servers': '18.235.75.135'})
-                kafka_topic: str = 'rpggame2_combat_log'
+                producer = rpgame.utils.kafka_get_producer()
+                rpgame.utils.kafka_produce_message(producer, rpgame.utils.attack_topic, self.get_attack_json(attack))
 
-                kafka_message = attack.get_log_entry().rstrip('\n').strip().encode('utf-8')
-                producer.produce(kafka_topic, kafka_message, callback=self.kafka_produce_report)
             else:
                 with open(file_path, 'a') as log_file:
-                    print(attack.get_log_entry(), file=log_file)
+                    print(self.get_attack_json(attack), file=log_file)
         else:
             self.is_fight_active = False
+            return self.get_fight_summary()
 
     def get_fight_summary(self):
         dodge_count: int = 0
@@ -103,7 +126,7 @@ class Fight(object):
             if not attack.was_dodged and not attack.was_missed:
                 net_attack_count += 1
 
-        print('*' * 40 + 'Fight Summary for {}'.format(attack.enemy.name) + '*' * 40)
+        print('*' * 40 + 'Fight Summary for {}'.format(self.enemy.name) + '*' * 40)
 
         print('Enemy Orig. HP:{}'
               ' | Gross Dmg:{}'
@@ -117,7 +140,7 @@ class Fight(object):
               ' | Misses:{}'
               ' | Blocked:{}'
               ' | Attack Success:{}'
-              .format(attack.enemy.original_hit_points, total_gross_damage,
+              .format(self.enemy.original_hit_points, total_gross_damage,
                       total_net_damage, -total_block_amount,
                       -overkill_total, critical_count,
                       gross_attack_count, net_attack_count,
@@ -126,6 +149,9 @@ class Fight(object):
                       block_count,
                       float(net_attack_count / gross_attack_count) * 100))
         print('*' * 40 + '*' * 40)
+
+    def get_json_string(self):
+        return jsonpickle.encode({'id': self.id, 'cr_date': self.cr_date}, unpicklable=False)
 
 
 class Attack(object):
@@ -227,7 +253,7 @@ class Attack(object):
         # work out the critical strike chance
         self._is_critical = Attack.calc_critical(self._player.critical_chance)
         if self._is_critical:
-            self._player_attack_amt *= 1.5
+            self._player_attack_amt *= self._player.critical_multiplier
 
         self._player_attack_amt = round(self._player_attack_amt)
 
@@ -288,23 +314,13 @@ class Attack(object):
             t_enemy.hit_points = 0
             t_enemy.alive = False
 
-            # Rebirth logic, we'll come back to this later
-            # t_enemy.lives -= 1
-            #
-            # if t_enemy._can_rebirth and t_enemy.lives > 0:
-            #     if (random.randint(1, 100) * .001) <= t_enemy._rebirth_chance:
-            #         if t_enemy.alive:
-            #             t_enemy.hit_points = t_enemy._original_hp
-            #             self._is_reborn = True
-            # else:
-
     def _calc_blocked(self):
         """ Determines if an attack is blocked this is based on the enemies block chance"""
-        return random.randint(1, 100) * .01 <= self._enemy._block_chance
+        return random.randint(1, 100) * .01 <= self._enemy.block_chance
 
     def _calc_dodges(self):
         """ Determines if an attack is dodged based on enemy's dodge chance """
-        return random.randint(1, 100) * .01 <= self._enemy._dodge_chance
+        return random.randint(1, 100) * .01 <= self._enemy.dodge_chance
 
     def _calc_missed(self):
         """ Determines if a player's strike will miss based on his miss_chance """
@@ -322,12 +338,12 @@ class Attack(object):
 
         return result
 
-    # def __str__(self):
-    #     return '{0.event_time}|{0._player.name}|{0._enemy.name}|{0._enemy.level}' \
-    #            '|Original HP:{0._enemy.original_hit_points}|Previous HP:{0._enemy.previous_hp}|' \
-    #            'Current HP:{0._enemy.hit_points}' \
-    #            '|Amount:{0.player_attack_amount}|Base Amount:{0._base_attack}|Overkill:{0.overkill}' \
-    #            '|Critical:{0.was_critical}|Missed:{0.was_missed}|Blocked:{0.was_blocked}' \
-    #            '|Dodged:{0.was_dodged}|Amount Blocked:{0.amount_blocked}|Is_Dead:{0.is_dead}' \
-    #            '|Is_Reborn={0.was_reborn}' \
-    #         .format(self)
+    def __str__(self):
+        return '{0.event_time}|{0._player.name}|{0._enemy.name}|{0._enemy.level}' \
+               '|Original HP:{0._enemy.original_hit_points}|Previous HP:{0._enemy.previous_hp}|' \
+               'Current HP:{0._enemy.hit_points}' \
+               '|Amount:{0.player_attack_amount}|Base Amount:{0._base_attack}|Overkill:{0.overkill}' \
+               '|Critical:{0.was_critical}|Missed:{0.was_missed}|Blocked:{0.was_blocked}' \
+               '|Dodged:{0.was_dodged}|Amount Blocked:{0.amount_blocked}|Is_Dead:{0.is_dead}' \
+               '|Is_Reborn={0.was_reborn}' \
+            .format(self)

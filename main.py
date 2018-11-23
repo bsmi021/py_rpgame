@@ -1,36 +1,46 @@
 import csv
 import random
 from collections import namedtuple
+from multiprocessing import Process
 
+import rpgame.utils
 from rpgame import combat, player
 from rpgame.item import Item, ItemSlot
+from rpgame.utils import return_0_if_none, kafka_produce_message, kafka_get_producer
 
 
-def return_0_if_none(value_check):
-    """ General function to return 0 if an int is null """
-    if value_check is None or value_check is '':
-        return 0
-    else:
-        return value_check
+def run_fight_sim(f_fight: combat.Fight, f_send_to_kafka: bool):
+    """ Executes the fight logic allowing multiple fights to occur at once"""
+    print(f_fight.start_fight(send_to_kafka=f_send_to_kafka, file_path=None))
 
 
 if __name__ == '__main__':
 
+    fight_count = 30
+    send_to_kafka = True
+
+    if send_to_kafka:
+        kafka_producer = kafka_get_producer()
+
+    # set the collections used by the program
     data = []
     players: [] = []
     parties: [] = []
     enemies: [] = []
     items = []
 
+    # specify the fields for the player.txt import file
     player_fields = 'id', 'name', 'level', 'head', 'chest', 'shoulders', 'legs', \
                     'wrist', 'hands', 'feet', 'back', 'main_hand', \
                     'off_hand', 'both_hand'
 
     player_item = namedtuple('player_item', " ".join(player_fields))
 
+    # import the items collection from the data\items.txt file
+    # for each line create a new instance of Item and add it to the items list
     with open('data\\items.txt', 'r', newline='') as infile:
         reader = csv.reader(infile, delimiter='|')
-        for row in reader:
+        for row in reader:  # need to skip the first row since there is a header
             if row[0].strip() == "id":
                 continue
 
@@ -41,9 +51,10 @@ if __name__ == '__main__':
                         slot=ItemSlot(int(row[4])))
             items.append(item)
 
+    # import the players collection from data\players.txt file
+    # for each line in the file parse it and Player and add it to the temporary namedtuple list
     with open('data\\players.txt', 'r', newline='') as infile:
         reader = csv.reader(infile, delimiter='|')
-        # get names from column headers
         for row in reader:
             # print(row)
             if row[0].strip() == 'id':
@@ -64,8 +75,9 @@ if __name__ == '__main__':
                                     both_hand=return_0_if_none(row[13])
                                     ))
 
+    # create a player record for each player
     for p_data in data:
-        playr = player.Player(name=p_data.name, level=p_data.level)
+        playr = player.Player(player_id=int(p_data.id), name=p_data.name, level=p_data.level)
         playr.equip_items(items[int(p_data.head) - 1])
         playr.equip_items(items[int(p_data.chest) - 1])
         playr.equip_items(items[int(p_data.shoulders) - 1])
@@ -76,35 +88,44 @@ if __name__ == '__main__':
         playr.equip_items(items[int(p_data.back) - 1])
         playr.equip_items(items[int(p_data.both_hand) - 1])
         players.append(playr)
+        if send_to_kafka:
+            kafka_produce_message(kafka_producer, rpgame.utils.player_topic, playr.get_json_string())
+        else:
+            print(playr.get_json_string())
 
-    # create parties for the players, players are selected randomly
+    # create parties for the players, players are selected randomly and assigned to a party
+    # note that players can only appear in one party per execution of the program
     for i in range(5):
         party = player.Party('Party')
+        party.name = party.id  # renaming the party by its ID, don't need a special name for this
         parties.append(party)
         while len(players) > 0 \
                 and len(party.members) <= 3:
             party.add_party_member(players.pop(random.randint(0, len(players) - 1)))
+        if send_to_kafka:
+            kafka_produce_message(kafka_producer, rpgame.utils.party_topic, party.get_json_string())
+        else:
+            print(party.get_json_string())
 
-    # print out the party members
-    for party in parties:
-        print()
-        print(party.name)
-        for player in party.members:
-            print(player)
-
-    print()
-    print()
-    """ Simulate 25 fights:
+    """ Simulate :fight_count fights:
             Create a random Enemy
             Select one of the parties from the parties list
             Create a fight object (file_path will write the combat log
             Get the fight summary on the screen
     """
-    for i in range(0, 3000):
-        enemy = None
-        fight = None
+    for i in range(fight_count):
         enemy = combat.get_random_enemy()
+        if send_to_kafka:
+            kafka_produce_message(kafka_producer, rpgame.utils.enemy_topic, enemy.get_json_string())
+        else:
+            print(enemy.get_json_string())
+
         party = parties[random.randint(0, len(parties) - 1)]
         fight = combat.Fight(party, enemy)
-        fight.start_fight(send_to_kafka=True)#file_path='..\data\combat_log.out')
-        #fight.get_fight_summary()
+
+        if send_to_kafka:
+            kafka_produce_message(kafka_producer, rpgame.utils.fight_topic, fight.get_json_string())
+        else:
+            print(fight.get_json_string())
+
+        Process(target=run_fight_sim, args=(fight, send_to_kafka)).start()

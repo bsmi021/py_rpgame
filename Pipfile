@@ -7,6 +7,8 @@ verify_ssl = true
 
 [packages]
 pytz = "*"
+confluent_kafka = "*"
+jsonpickle = "*"
 
 [requires]
 python_version = "3.7"

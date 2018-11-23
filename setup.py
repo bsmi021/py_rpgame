@@ -15,7 +15,8 @@ PACKAGES = find_packages(exclude=['test', 'tests.*'])
 
 REQUIRES = [
     'pytz>=2018.04',
-    'confluent_kafka>=0.11.6'
+    'confluent_kafka>=0.11.6',
+    'jsonpickle>=1.0'
 ]
 
 setup(
