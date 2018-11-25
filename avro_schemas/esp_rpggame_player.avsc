@@ -1,0 +1,109 @@
+{
+  "type" : "record",
+  "name" : "esp_rpggame_player",
+  "namespace" : "com.sas.ea.demo.rpggame",
+  "fields" : [ {
+    "name" : "shoulders_slot",
+    "type" : "int",
+    "default" : -99,
+    "doc" : "Type inferred from '20'"
+  }, {
+    "name" : "back_slot",
+    "type" : "int",
+    "default" : -99,
+    "doc" : "Type inferred from '18'"
+  }, {
+    "name" : "base_min_damage",
+    "type" : "int",
+    "doc" : "Type inferred from '2'"
+  }, {
+    "name" : "level",
+    "type" : "int",
+    "doc" : "Type inferred from '1'"
+  }, {
+    "name" : "chest_slot",
+    "type" : "int",
+    "default" : -99,
+    "doc" : "Type inferred from '8'"
+  }, {
+    "name" : "head_slot",
+    "type" : "int",
+    "default" : -99,
+    "doc" : "Type inferred from '10'"
+  }, {
+    "name" : "wrist_slot",
+    "type" : "int",
+    "default" : -99,
+    "doc" : "Type inferred from '9'"
+  }, {
+    "name" : "min_damage",
+    "type" : "int",
+    "doc" : "Type inferred from '16'"
+  }, {
+    "name" : "base_max_damage",
+    "type" : "int",
+    "doc" : "Type inferred from '8'"
+  }, {
+    "name" : "both_hand_slot",
+    "type" : "int",
+    "default" : -99,
+    "doc" : "Type inferred from '1'"
+  }, {
+    "name" : "base_critical_chance",
+    "type" : "double",
+    "doc" : "Type inferred from '0.05'"
+  }, {
+    "name" : "instance_id",
+    "type" : "long",
+    "doc" : "Type inferred from '1779726611564670650'"
+  }, {
+    "name" : "max_damage",
+    "type" : "int",
+    "doc" : "Type inferred from '46'"
+  }, {
+    "name" : "critical_chance",
+    "type" : "double",
+    "doc" : "Type inferred from '0.29'"
+  }, {
+    "name" : "name",
+    "type" : "string",
+    "doc" : "Type inferred from '\"Sandy\"'"
+  }, {
+    "name" : "id",
+    "type" : "int",
+    "doc" : "Type inferred from '2'"
+  }, {
+    "name" : "hands_slot",
+    "type" : "int",
+    "default" : -99,
+    "doc" : "Type inferred from '25'"
+  }, {
+    "name" : "miss_chance",
+    "type" : "double",
+    "doc" : "Type inferred from '0.05'"
+  }, {
+    "name" : "feet_slot",
+    "type" : "int",
+    "default" : -99,
+    "doc" : "Type inferred from '5'"
+  }, {
+    "name" : "legs_slot",
+    "type" : "int",
+    "default" : -99,
+    "doc" : "Type inferred from '23'"
+  }, {
+    "name" : "critical_multiplier",
+    "type" : "double",
+    "doc" : "Type inferred from '2.5'"
+  }, {
+   "name" : "main_hand_slot",
+   "type" : "int",
+   "default" : -99,
+   "doc" : "Type inferred from '23'"
+  }, {
+   "name" : "off_hand_slot",
+   "type" : "int",
+   "default" : -99,
+   "doc" : "Type inferred from '23'"
+  } ]
+}

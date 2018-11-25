@@ -1,0 +1,37 @@
+{
+  "type" : "record",
+  "name" : "rpggame_party",
+  "namespace" : "com.sas.ea.demo.rpggame",
+  "fields" : [ {
+    "name" : "cr_date",
+    "type" : "string",
+    "doc" : "Type inferred from '\"2018-11-24 05:07:55.571406-05:00\"'"
+  }, {
+    "name" : "id",
+    "type" : "long",
+    "doc" : "Type inferred from '38919501116288743'"
+  }, {
+    "name" : "members",
+    "type" : {
+      "type" : "array",
+      "items" : {
+        "type" : "record",
+        "name" : "members",
+        "fields" : [ {
+          "name" : "id",
+          "type" : "int",
+          "doc" : "Type inferred from '1'"
+        }, {
+          "name" : "instance_id",
+          "type" : "long",
+          "doc" : "Type inferred from '224575509799841511'"
+        } ]
+      }
+    },
+    "doc" : "Type inferred from '[{\"id\":1,\"instance_id\":224575509799841511},{\"id\":12,\"instance_id\":1263305653756047080},{\"id\":5,\"instance_id\":760414255259266792},{\"id\":6,\"instance_id\":2257861165719695079}]'"
+  }, {
+    "name" : "name",
+    "type" : "long",
+    "doc" : "Type inferred from '38919501116288743'"
+  } ]
+}

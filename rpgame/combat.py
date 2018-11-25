@@ -44,7 +44,8 @@ class Fight(object):
             print('Message delivered to {} [{}]'.format(msg.topic(), msg.partition()))
 
     def get_attack_json(self, attack):
-        attack_obj = {'event_time': attack.event_time,
+        attack_obj = {'id': attack.id,
+                      'event_time': attack.event_time,
                       'fight_id': self.id,
                       'party_id': self.party.id,
                       'player_id': attack.player.id,
@@ -151,12 +152,14 @@ class Fight(object):
         print('*' * 40 + '*' * 40)
 
     def get_json_string(self):
-        return jsonpickle.encode({'id': self.id, 'cr_date': self.cr_date}, unpicklable=False)
+        return jsonpickle.encode({'id': self.id, 'cr_date': self.cr_date, 'party_id': self.party.id,
+                                  'enemy_id': self.enemy.id}, unpicklable=False)
 
 
 class Attack(object):
     def __init__(self, i_player: player.Player, i_enemy: enemy.Enemy):
         """ Creates an instance of the Attack Class"""
+        self.id = hash(uuid.uuid4())
         self._player: player.Player = i_player
         self._enemy: enemy.Enemy = i_enemy
         self._is_blocked: bool = False

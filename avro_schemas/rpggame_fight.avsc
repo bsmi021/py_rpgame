@@ -1,0 +1,22 @@
+{
+  "type" : "record",
+  "name" : "rpggame_fight",
+  "namespace" : "com.sas.ea.demo.rpggame",
+  "fields" : [ {
+    "name" : "cr_date",
+    "type" : "string",
+    "doc" : "Type inferred from '\"2018-11-25 03:41:22.454451-05:00\"'"
+  }, {
+    "name" : "enemy_id",
+    "type" : "long",
+    "doc" : "Type inferred from '944790861590045125'"
+  }, {
+    "name" : "id",
+    "type" : "long",
+    "doc" : "Type inferred from '1819434147972443685'"
+  }, {
+    "name" : "party_id",
+    "type" : "long",
+    "doc" : "Type inferred from '910663928043220717'"
+  } ]
+}

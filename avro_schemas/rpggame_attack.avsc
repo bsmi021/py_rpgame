@@ -1,0 +1,90 @@
+{
+  "type" : "record",
+  "name" : "rpggame_attack",
+  "namespace" : "com.sas.ea.demo.rpggame",
+  "fields" : [
+  {
+    "name" : "id",
+    "type" : "long"
+  }, {
+    "name" : "attack_amt",
+    "type" : "int",
+    "doc" : "Type inferred from '43'"
+  }, {
+    "name" : "base_attack_amt",
+    "type" : "int",
+    "doc" : "Type inferred from '43'"
+  }, {
+    "name" : "blocked",
+    "type" : "boolean",
+    "doc" : "Type inferred from 'false'"
+  }, {
+    "name" : "blocked_amt",
+    "type" : "int",
+    "doc" : "Type inferred from '0'"
+  }, {
+    "name" : "critical",
+    "type" : "boolean",
+    "doc" : "Type inferred from 'false'"
+  }, {
+    "name" : "dodged",
+    "type" : "boolean",
+    "doc" : "Type inferred from 'false'"
+  }, {
+    "name" : "enemy_base_hp",
+    "type" : "int",
+    "doc" : "Type inferred from '8321'"
+  }, {
+    "name" : "enemy_hp",
+    "type" : "int",
+    "doc" : "Type inferred from '5777'"
+  }, {
+    "name" : "enemy_id",
+    "type" : "long",
+    "doc" : "Type inferred from '1939713882343065089'"
+  }, {
+    "name" : "enemy_is_dead",
+    "type" : "boolean",
+    "doc" : "Type inferred from 'false'"
+  }, {
+    "name" : "enemy_name",
+    "type" : "string",
+    "doc" : "Type inferred from '\"Gnoll_1939713882343065089[5]\"'"
+  }, {
+    "name" : "enemy_prev_hp",
+    "type" : "int",
+    "doc" : "Type inferred from '5820'"
+  }, {
+    "name" : "event_time",
+    "type" : "string",
+    "doc" : "Type inferred from '\"2018-11-24 07:28:52.974487-05:00\"'"
+  }, {
+    "name" : "fight_id",
+    "type" : "long",
+    "doc" : "Type inferred from '561759451498922489'"
+  }, {
+    "name" : "missed",
+    "type" : "boolean",
+    "doc" : "Type inferred from 'false'"
+  }, {
+    "name" : "overkill_amt",
+    "type" : "int",
+    "doc" : "Type inferred from '0'"
+  }, {
+    "name" : "party_id",
+    "type" : "long",
+    "doc" : "Type inferred from '564782686825033426'"
+  }, {
+    "name" : "player_id",
+    "type" : "int",
+    "doc" : "Type inferred from '10'"
+  }, {
+    "name" : "player_instance_id",
+    "type" : "long",
+    "doc" : "Type inferred from '2172537551586275026'"
+  }, {
+    "name" : "player_name",
+    "type" : "string",
+    "doc" : "Type inferred from '\"Tony\"'"
+  } ]
+}

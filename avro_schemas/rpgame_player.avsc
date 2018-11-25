@@ -1,0 +1,77 @@
+{
+  "type" : "record",
+  "name" : "rpgame_player",
+  "namespace" : "com.sas.ea.demo.rpggame",
+  "fields" : [ {
+    "name" : "base_critical_chance",
+    "type" : "double",
+    "doc" : "Type inferred from '0.05'"
+  }, {
+    "name" : "base_max_damage",
+    "type" : "int",
+    "doc" : "Type inferred from '8'"
+  }, {
+    "name" : "base_min_damage",
+    "type" : "int",
+    "doc" : "Type inferred from '2'"
+  }, {
+    "name" : "critical_chance",
+    "type" : "double",
+    "doc" : "Type inferred from '0.29'"
+  }, {
+    "name" : "critical_multiplier",
+    "type" : "double",
+    "doc" : "Type inferred from '2.5'"
+  }, {
+    "name" : "equipped_items",
+    "type" : {
+      "type" : "array",
+      "items" : {
+        "type" : "record",
+        "name" : "equipped_items",
+        "fields" : [ {
+          "name" : "id",
+          "type" : "int",
+          "doc" : "Type inferred from '10'"
+        }, {
+          "name" : "item_slot",
+          "type" : "int",
+          "doc" : "Type inferred from '1'"
+        }, {
+          "name" : "slot_name",
+          "type" : "string",
+          "doc" : "Type inferred from '\"HEAD\"'"
+        } ]
+      }
+    },
+    "doc" : "Type inferred from '[{\"id\":10,\"item_slot\":1,\"slot_name\":\"HEAD\"},{\"id\":8,\"item_slot\":2,\"slot_name\":\"CHEST\"},{\"id\":20,\"item_slot\":3,\"slot_name\":\"SHOULDERS\"},{\"id\":23,\"item_slot\":4,\"slot_name\":\"LEGS\"},{\"id\":9,\"item_slot\":5,\"slot_name\":\"WRIST\"},{\"id\":25,\"item_slot\":6,\"slot_name\":\"HANDS\"},{\"id\":5,\"item_slot\":7,\"slot_name\":\"FEET\"},{\"id\":18,\"item_slot\":8,\"slot_name\":\"BACK\"},{\"id\":1,\"item_slot\":11,\"slot_name\":\"BOTH_HAND\"}]'"
+  }, {
+    "name" : "id",
+    "type" : "int",
+    "doc" : "Type inferred from '2'"
+  }, {
+    "name" : "instance_id",
+    "type" : "long",
+    "doc" : "Type inferred from '2285199388474027708'"
+  }, {
+    "name" : "level",
+    "type" : "int",
+    "doc" : "Type inferred from '1'"
+  }, {
+    "name" : "max_damage",
+    "type" : "int",
+    "doc" : "Type inferred from '46'"
+  }, {
+    "name" : "min_damage",
+    "type" : "int",
+    "doc" : "Type inferred from '16'"
+  }, {
+    "name" : "miss_chance",
+    "type" : "double",
+    "doc" : "Type inferred from '0.05'"
+  }, {
+    "name" : "name",
+    "type" : "string",
+    "doc" : "Type inferred from '\"Sandy\"'"
+  } ]
+}

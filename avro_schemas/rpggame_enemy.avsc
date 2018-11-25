@@ -1,0 +1,74 @@
+{
+  "type" : "record",
+  "name" : "rpggame_enemy",
+  "namespace" : "com.sas.ea.demo.rpggame",
+  "fields" : [ {
+    "name" : "alive",
+    "type" : "boolean",
+    "doc" : "Type inferred from 'true'"
+  }, {
+    "name" : "block_amount",
+    "type" : "double",
+    "doc" : "Type inferred from '0.57'"
+  }, {
+    "name" : "block_chance",
+    "type" : "double",
+    "doc" : "Type inferred from '0.18'"
+  }, {
+    "name" : "can_block",
+    "type" : "boolean",
+    "doc" : "Type inferred from 'false'"
+  }, {
+    "name" : "can_dodge",
+    "type" : "boolean",
+    "doc" : "Type inferred from 'true'"
+  }, {
+    "name" : "can_parry",
+    "type" : "boolean",
+    "doc" : "Type inferred from 'false'"
+  }, {
+    "name" : "dodge_chance",
+    "type" : "double",
+    "doc" : "Type inferred from '0.08'"
+  }, {
+    "name" : "experience_worth",
+    "type" : "int",
+    "doc" : "Type inferred from '405'"
+  }, {
+    "name" : "gold_value",
+    "type" : "double",
+    "doc" : "Type inferred from '0.0036'"
+  }, {
+    "name" : "hit_points",
+    "type" : "int",
+    "doc" : "Type inferred from '6657'"
+  }, {
+    "name" : "id",
+    "type" : "long",
+    "doc" : "Type inferred from '2201686785804925451'"
+  }, {
+    "name" : "level",
+    "type" : "int",
+    "doc" : "Type inferred from '2'"
+  }, {
+    "name" : "name",
+    "type" : "string",
+    "doc" : "Type inferred from '\"Gnoll_2201686785804925451[2]\"'"
+  }, {
+    "name" : "original_hit_points",
+    "type" : "int",
+    "doc" : "Type inferred from '6657'"
+  }, {
+    "name" : "parry_chance",
+    "type" : "double",
+    "doc" : "Type inferred from '0.05'"
+  }, {
+    "name" : "previous_hp",
+    "type" : "int",
+    "doc" : "Type inferred from '6657'"
+  }, {
+    "name" : "race",
+    "type" : "string",
+    "doc" : "Type inferred from '\"Gnoll\"'"
+  } ]
+}
