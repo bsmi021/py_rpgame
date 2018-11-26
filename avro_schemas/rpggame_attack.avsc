@@ -4,7 +4,7 @@
   "namespace" : "com.sas.ea.demo.rpggame",
   "fields" : [
   {
-    "name" : "id",
+    "name" : "attack_id",
     "type" : "long"
   }, {
     "name" : "attack_amt",

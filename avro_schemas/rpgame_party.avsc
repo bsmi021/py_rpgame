@@ -7,7 +7,7 @@
     "type" : "string",
     "doc" : "Type inferred from '\"2018-11-24 05:07:55.571406-05:00\"'"
   }, {
-    "name" : "id",
+    "name" : "party_id",
     "type" : "long",
     "doc" : "Type inferred from '38919501116288743'"
   }, {

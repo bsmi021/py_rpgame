@@ -11,7 +11,7 @@
     "type" : "long",
     "doc" : "Type inferred from '944790861590045125'"
   }, {
-    "name" : "id",
+    "name" : "fight_id",
     "type" : "long",
     "doc" : "Type inferred from '1819434147972443685'"
   }, {

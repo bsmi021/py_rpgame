@@ -43,7 +43,7 @@
     "type" : "int",
     "doc" : "Type inferred from '6657'"
   }, {
-    "name" : "id",
+    "name" : "enemy_id",
     "type" : "long",
     "doc" : "Type inferred from '2201686785804925451'"
   }, {

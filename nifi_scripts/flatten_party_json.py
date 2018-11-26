@@ -13,6 +13,10 @@ class ModJSON(StreamCallback):
         json_string = IOUtils.toString(inputStream, StandardCharsets.UTF_8)
         obj = json.loads(json_string)
 
+        if obj["id"] is not None:
+            obj["party_id"] = obj["id"]
+            del (obj["id"])
+
         if obj["members"] is not None:  # iterate members and add them to the dictionary
             for i in range(len(obj['members'])):
                 o = obj['members'][i]

@@ -2,6 +2,7 @@ import datetime
 import json
 import uuid
 
+import avro.schema
 import pytz
 from confluent_kafka.cimpl import Producer
 
@@ -44,9 +45,13 @@ def kafka_get_producer():
     return Producer({'bootstrap.servers': kafka_bootstrap_server})
 
 
-kafka_bootstrap_server = 'xx.xx.xx.xx'
+kafka_bootstrap_server = '10.104.87.86'
 party_topic = 'rpggame_parties'
 player_topic = 'rpggame_players'
 fight_topic = 'rpggame_fights'
 attack_topic = 'rpggame_attacks'
 enemy_topic = 'rpggame_enemies'
+
+
+def get_avro_schema_from_json(json_string: str = None) -> str:
+    avro.schema.Parse(json_string)

@@ -53,7 +53,7 @@
     "type" : "double",
     "doc" : "Type inferred from '0.05'"
   }, {
-    "name" : "instance_id",
+    "name" : "player_instance_id",
     "type" : "long",
     "doc" : "Type inferred from '1779726611564670650'"
   }, {
@@ -69,7 +69,7 @@
     "type" : "string",
     "doc" : "Type inferred from '\"Sandy\"'"
   }, {
-    "name" : "id",
+    "name" : "player_id",
     "type" : "int",
     "doc" : "Type inferred from '2'"
   }, {

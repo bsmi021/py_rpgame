@@ -17,11 +17,13 @@ def run_fight_sim(f_fight: combat.Fight, f_send_to_kafka: bool):
     print(f_fight.start_fight(send_to_kafka=f_send_to_kafka, file_path=None, producer=f_producer))
 
 
-if __name__ == '__main__':
+def main():
 
     fight_count = 30
     send_to_kafka = True
     kafka_producer = None
+
+    print('Starting to process {} fights, please be patient...'.format(fight_count))
 
     if send_to_kafka:
         kafka_producer = kafka_get_producer()
@@ -133,3 +135,7 @@ if __name__ == '__main__':
             print(fight.get_json_string())
 
         Process(target=run_fight_sim, args=(fight, send_to_kafka)).start()
+
+
+if __name__ == '__main__':
+    main()

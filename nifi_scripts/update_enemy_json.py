@@ -14,18 +14,9 @@ class ModJSON(StreamCallback):
         obj = json.loads(json_string)
 
         if obj["id"] is not None:
-            obj["player_id"] = obj["id"]
+            obj["enemy_id"] = obj["id"]
             del (obj["id"])
 
-        if obj["instance_id"] is not None:
-            obj["player_instance_id"] = obj["instance_id"]
-            del (obj["instance_id"])
-
-        if obj["equipped_items"] is not None:
-            for o in obj["equipped_items"]:
-                obj[str(o['slot_name']).lower() + '_slot'] = int(o['id'])
-
-        del (obj["equipped_items"])
         outputStream.write(bytearray(json.dumps(obj).encode('utf-8')))
 
 
