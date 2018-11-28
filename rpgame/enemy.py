@@ -8,7 +8,7 @@ class Enemy(object):
                  can_block: bool = False, can_dodge: bool = False, can_parry: bool = False,
                  race: str = None):
         self.id = hash(uuid.uuid4())
-        self.name = '{}_{}[{}]'.format(name, self.id, level)
+        self.name = '{}[{}]'.format(name, level)
         self.hit_points: int = round(((hit_points * (1 + level * .1)) * 25.5))
         self.original_hit_points: int = self.hit_points
         self.previous_hp: int = self.hit_points

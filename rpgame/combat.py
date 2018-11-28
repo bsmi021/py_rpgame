@@ -3,6 +3,7 @@ import time
 import uuid
 
 import jsonpickle
+import namesgenerator
 
 import rpgame.utils
 from rpgame import enemy, player
@@ -15,13 +16,13 @@ def get_attack_time():
 
 def get_random_enemy() -> enemy.Enemy:
     enemy_rand = random.randint(1, 3)
-
+    enemy_name = namesgenerator.get_random_name()
     if enemy_rand == 2:
-        i_enemy = enemy.Gnoll(name='Gnoll', level=random.randint(1, 5))
+        i_enemy = enemy.Gnoll(name=enemy_name, level=random.randint(1, 5))
     elif enemy_rand == 3:
-        i_enemy = enemy.Orc(name='Orc', level=random.randint(1, 5))
+        i_enemy = enemy.Orc(name=enemy_name, level=random.randint(1, 5))
     else:
-        i_enemy = enemy.Troll(name='Troll', level=random.randint(1, 5))
+        i_enemy = enemy.Troll(name=enemy_name, level=random.randint(1, 5))
 
     return i_enemy
 
