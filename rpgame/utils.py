@@ -17,8 +17,7 @@ class UUIDEncoder(json.JSONEncoder):
 def get_localized_time():
     """ returns the timestamp of the attack"""
     utc_time = datetime.datetime.utcnow()
-    return pytz.utc.localize(utc_time).astimezone()
-
+    return pytz.utc.localize(utc_time)
 
 def return_0_if_none(value_check):
     """ General function to return 0 if an int is null """

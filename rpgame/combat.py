@@ -1,10 +1,8 @@
-import datetime
 import random
 import time
 import uuid
 
 import jsonpickle
-import pytz
 
 import rpgame.utils
 from rpgame import enemy, player
@@ -77,14 +75,14 @@ class Fight(object):
             attack = Attack(f_player, self.enemy)
             self.attacks.append(attack)
             # put an artificial break in the action
-            time.sleep(random.randint(0, 35) * .01)
+            time.sleep(random.randint(5, 15) * .05)
             attack.execute_attack()
             if file_path is None and not send_to_kafka:
                 print(self.get_attack_json(attack))
             elif send_to_kafka:
                 # producer = rpgame.utils.kafka_get_producer()
                 rpgame.utils.kafka_produce_message(producer, rpgame.utils.attack_topic, self.get_attack_json(attack))
-
+                print(self.get_attack_json(attack))
             else:
                 with open(file_path, 'a') as log_file:
                     print(self.get_attack_json(attack), file=log_file)
@@ -218,8 +216,7 @@ class Attack(object):
     @staticmethod
     def get_attack_time():
         """ returns the timestamp of the attack"""
-        utc_time = datetime.datetime.utcnow()
-        return pytz.utc.localize(utc_time).astimezone()
+        return rpgame.utils.get_localized_time()
 
     @staticmethod
     def calc_critical(f_critical_chance: float = 0.0) -> bool:

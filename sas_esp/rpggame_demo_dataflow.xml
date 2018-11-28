@@ -1,0 +1,812 @@
+<project name="rpggame_demo_dataflow" threads="4" pubsub="manual" heartbeat-interval="1">
+    <metadata>
+        <meta id="studioUploadedBy">brwsmi</meta>
+        <meta id="studioUploaded">1543138136960</meta>
+        <meta id="studioModifiedBy">brwsmi</meta>
+        <meta id="studioModified">1543424448620</meta>
+        <meta id="layout">
+            {"cq1":{"Union":{"x":-1260.315975286849,"y":-375.0242718446602},"attack_compute":{"x":235,"y":355},"attack_time_variables":{"x":200,"y":660},"enemy_compute":{"x":-205,"y":35},"fight_compute":{"x":55,"y":40},"fight_summary":{"x":-80,"y":810},"fight_summary_compute":{"x":-80,"y":660},"join_figh_enemy":{"x":-85,"y":205},"join_fight_partyDetails":{"x":-265,"y":350},"join_playerFight_attacks":{"x":-80,"y":520},"join_player_party":{"x":-455,"y":25},"normalized_party":{"x":-455,"y":-165},"player_compute":{"x":-455,"y":195},"rpggame_attack_source":{"x":235,"y":205},"rpggame_enemy_source":{"x":-205,"y":-160},"rpggame_fight_source":{"x":55,"y":-160},"rpggame_parties_source":{"x":-455,"y":-325},"rpggame_player_source":{"x":-725,"y":-165}}}
+        </meta>
+        <meta id="studioTags">dataflow, data, kafka, rpg, data_management, nifi, demo</meta>
+    </metadata>
+    <mas-modules>
+        <mas-module module="ds2_module" language="ds2" func-names="normalize_party">
+            <code><![CDATA[ds2_options sas;
+package test_package;
+	method normalize_party(bigint party_id, nchar(50) name, nchar(50) cr_date, 
+							int member_id_1, bigint member_inst_id_1, 
+							int member_id_2, bigint member_inst_id_2, 
+							int member_id_3, bigint member_inst_id_3,
+							int member_id_4, bigint member_inst_id_4,
+							int member_id_5, bigint member_inst_id_5,
+							int member_id_6, bigint member_inst_id_6,
+							in_out bigint part_id[6], 
+							in_out varchar(50) cr_dt[6], 
+							in_out varchar(50) party_name[6],
+							in_out bigint member_inst_id[6]);
+		dcl int i;
+		do i = 1 to 6;
+			part_id[i] = party_id;
+			party_name[i] = trim(name);
+			cr_dt[i] = trim(cr_date);
+			
+			if i = 1 then member_inst_id[1] = member_inst_id_1; 
+			if i = 2 then member_inst_id[2] = member_inst_id_2; 
+			if i = 3 then member_inst_id[3] = member_inst_id_3; 
+			if i = 4 then member_inst_id[4] = member_inst_id_4; 
+			if i = 5 then member_inst_id[5] = member_inst_id_5; 
+			if i = 6 then member_inst_id[6] = member_inst_id_6; 
+		end;
+
+	end;
+endpackage;]]></code>
+        </mas-module>
+        <mas-module module="python_module" language="python" func-names="get_att_event_time_tokens">
+            <code><![CDATA[import datetime
+
+
+def get_att_event_time_tokens(att_event_time):
+    "Output: att_year, att_month, att_day, att_hour, att_min, att_sec, att_ms, att_timestamp"
+    att_event_time = att_event_time.replace('+00:00', '')
+    dt = datetime.datetime.strptime(att_event_time, '%Y-%m-%d %H:%M:%S.%f')
+    att_year = dt.year
+    att_month = dt.month
+    att_day = dt.day
+    att_hour = dt.hour
+    att_min = dt.minute
+    att_sec = dt.second
+    att_ms = dt.microsecond
+    att_timestamp = int(dt.timestamp() * 1000000)
+    att_date = int(datetime.datetime.strptime('{}-{}-{}'.format(att_year, att_month, att_day), '%Y-%m-%d').timestamp())
+    att_datetime = int(datetime.datetime.strptime('{}-{}-{} {}:{}:{}'.format(att_year, att_month, att_day,
+                                                                             att_hour, att_min, att_sec)
+                                                  , '%Y-%m-%d %H:%M:%S').timestamp())
+
+    return att_year, att_month, att_day, att_hour, att_min, att_sec, att_ms, att_timestamp, att_date, att_datetime]]></code>
+        </mas-module>
+        <mas-module module="party_python" language="python" func-names="normalize_party">
+            <code><![CDATA[def normalize_party(party_id, name, cr_date, member_id_1, member_inst_id_1,
+                    member_id_2, member_inst_id_2,
+                    member_id_3, member_inst_id_3,
+                    member_id_4, member_inst_id_4,
+                    member_id_5, member_inst_id_5,
+                    member_id_6, member_inst_id_6):
+    "Output: p_party_id, party_name, party_cr_date, party_member_inst_id"
+    p_party_id = []
+    party_name = []
+    party_cr_date = []
+    party_member_inst_id = []
+
+    for i in range(6):
+
+        if i == 0:
+            if member_inst_id_1 > 0:
+                p_party_id.append(party_id)
+                party_name.append(name)
+                party_cr_date.append(cr_date)
+                party_member_inst_id.append(member_inst_id_1)
+        elif i == 1:
+            if member_inst_id_2 > 0:
+                p_party_id.append(party_id)
+                party_name.append(name)
+                party_cr_date.append(cr_date)
+                party_member_inst_id.append(member_inst_id_2)
+        elif i == 2:
+            if member_inst_id_3 > 0:
+                p_party_id.append(party_id)
+                party_name.append(name)
+                party_cr_date.append(cr_date)
+                party_member_inst_id.append(member_inst_id_3)
+        elif i == 3:
+            if member_inst_id_4 > 0:
+                p_party_id.append(party_id)
+                party_name.append(name)
+                party_cr_date.append(cr_date)
+                party_member_inst_id.append(member_inst_id_4)
+        elif i == 4:
+            if member_inst_id_5 > 0:
+                p_party_id.append(party_id)
+                party_name.append(name)
+                party_cr_date.append(cr_date)
+                party_member_inst_id.append(member_inst_id_5)
+        elif i == 5:
+            if member_inst_id_6 > 0:
+                p_party_id.append(party_id)
+                party_name.append(name)
+                party_cr_date.append(cr_date)
+                party_member_inst_id.append(member_inst_id_6)
+        else:
+            party_member_inst_id.append(-99)
+
+    return p_party_id, party_name, party_cr_date, party_member_inst_id]]></code>
+        </mas-module>
+    </mas-modules>
+    <contqueries>
+        <contquery name="cq1">
+            <windows>
+                <window-source name="rpggame_parties_source">
+                    <schema>
+                        <fields>
+                            <field name="party_id" type="int64" key="true"/>
+                            <field name="name" type="string"/>
+                            <field name="cr_date" type="string"/>
+                            <field name="member_id_1" type="int32"/>
+                            <field name="member_inst_id_1" type="int64"/>
+                            <field name="member_id_2" type="int32"/>
+                            <field name="member_inst_id_2" type="int64"/>
+                            <field name="member_id_3" type="int32"/>
+                            <field name="member_inst_id_3" type="int64"/>
+                            <field name="member_id_4" type="int32"/>
+                            <field name="member_inst_id_4" type="int64"/>
+                            <field name="member_id_5" type="int32"/>
+                            <field name="member_inst_id_5" type="int64"/>
+                            <field name="member_id_6" type="int32"/>
+                            <field name="member_inst_id_6" type="int64"/>
+                        </fields>
+                    </schema>
+                </window-source>
+                <window-source name="rpggame_player_source">
+                    <schema>
+                        <fields>
+                            <field name="player_id" type="int32" key="true"/>
+                            <field name="player_instance_id" type="int64" key="true"/>
+                            <field name="name" type="string"/>
+                            <field name="shoulders_slot" type="int32"/>
+                            <field name="head_slot" type="int32"/>
+                            <field name="back_slot" type="int32"/>
+                            <field name="chest_slot" type="int32"/>
+                            <field name="both_hand_slot" type="int32"/>
+                            <field name="hands_slot" type="int32"/>
+                            <field name="feet_slot" type="int32"/>
+                            <field name="legs_slot" type="int32"/>
+                            <field name="main_hand_slot" type="int32"/>
+                            <field name="off_hand_slot" type="int32"/>
+                            <field name="base_min_damage" type="int32"/>
+                            <field name="level" type="int32"/>
+                            <field name="min_damage" type="int32"/>
+                            <field name="base_max_damage" type="int32"/>
+                            <field name="base_critical_chance" type="double"/>
+                            <field name="max_damage" type="int32"/>
+                            <field name="critical_chance" type="double"/>
+                            <field name="miss_chance" type="double"/>
+                            <field name="critical_multiplier" type="double"/>
+                        </fields>
+                    </schema>
+                </window-source>
+                <window-source name="rpggame_enemy_source">
+                    <schema>
+                        <fields>
+                            <field name="enemy_id" type="int64" key="true"/>
+                            <field name="name" type="string"/>
+                            <field name="alive" type="string"/>
+                            <field name="block_amount" type="double"/>
+                            <field name="block_chance" type="double"/>
+                            <field name="can_block" type="string"/>
+                            <field name="can_dodge" type="string"/>
+                            <field name="can_parry" type="string"/>
+                            <field name="dodge_chance" type="double"/>
+                            <field name="experience_worth" type="int32"/>
+                            <field name="gold_value" type="double"/>
+                            <field name="hit_points" type="int32"/>
+                            <field name="level" type="int32"/>
+                            <field name="original_hit_points" type="int32"/>
+                            <field name="parry_chance" type="double"/>
+                            <field name="previous_hp" type="int32"/>
+                            <field name="race" type="string"/>
+                        </fields>
+                    </schema>
+                </window-source>
+                <window-source name="rpggame_attack_source">
+                    <schema>
+                        <fields>
+                            <field name="attack_id" type="int64" key="true"/>
+                            <field name="attack_amt" type="int32"/>
+                            <field name="base_attack_amt" type="int32"/>
+                            <field name="blocked" type="string"/>
+                            <field name="blocked_amt" type="int32"/>
+                            <field name="critical" type="string"/>
+                            <field name="dodged" type="string"/>
+                            <field name="enemy_base_hp" type="int32"/>
+                            <field name="enemy_hp" type="int32"/>
+                            <field name="enemy_id" type="int64"/>
+                            <field name="enemy_is_dead" type="string"/>
+                            <field name="enemy_name" type="string"/>
+                            <field name="enemy_prev_hp" type="int32"/>
+                            <field name="event_time" type="string"/>
+                            <field name="fight_id" type="int64"/>
+                            <field name="missed" type="string"/>
+                            <field name="overkill_amt" type="int32"/>
+                            <field name="party_id" type="int64"/>
+                            <field name="player_instance_id" type="int64"/>
+                            <field name="player_name" type="string"/>
+                        </fields>
+                    </schema>
+                </window-source>
+                <window-source pubsub="true" name="rpggame_fight_source">
+                    <schema>
+                        <fields>
+                            <field name="fight_id" type="int64" key="true"/>
+                            <field name="cr_date" type="string"/>
+                            <field name="party_id" type="int64"/>
+                            <field name="enemy_id" type="int64"/>
+                        </fields>
+                    </schema>
+                </window-source>
+                <window-compute name="attack_compute">
+                    <schema>
+                        <fields>
+                            <field name="att_attack_amt" type="int32"/>
+                            <field name="att_base_attack_amt" type="int32"/>
+                            <field name="att_blocked" type="int32"/>
+                            <field name="att_blocked_amt" type="int32"/>
+                            <field name="att_critical" type="int32"/>
+                            <field name="att_dodged" type="int32"/>
+                            <field name="att_enemy_base_hp" type="int32"/>
+                            <field name="att_enemy_hp" type="int32"/>
+                            <field name="att_enemy_id" type="int64"/>
+                            <field name="att_enemy_is_dead" type="int32"/>
+                            <field name="att_enemy_prev_hp" type="int32"/>
+                            <field name="att_event_time" type="string"/>
+                            <field name="att_fight_id" type="int64"/>
+                            <field name="att_missed" type="int32"/>
+                            <field name="att_overkill_amt" type="int32"/>
+                            <field name="att_party_id" type="int64"/>
+                            <field name="att_player_instance_id" type="int64"/>
+                            <field name="attack_id" type="int64" key="true"/>
+                        </fields>
+                    </schema>
+                    <output>
+                        <field-expr><![CDATA[attack_amt]]></field-expr>
+                        <field-expr><![CDATA[base_attack_amt]]></field-expr>
+                        <field-expr><![CDATA[if blocked == 'true'
+return 1
+else
+return 0]]></field-expr>
+                        <field-expr><![CDATA[blocked_amt]]></field-expr>
+                        <field-expr><![CDATA[if critical == 'true'
+return 1
+else
+return 0]]></field-expr>
+                        <field-expr><![CDATA[if dodged == 'true'
+return 1
+else
+return 0]]></field-expr>
+                        <field-expr><![CDATA[enemy_base_hp]]></field-expr>
+                        <field-expr><![CDATA[enemy_hp]]></field-expr>
+                        <field-expr><![CDATA[enemy_id]]></field-expr>
+                        <field-expr><![CDATA[if enemy_is_dead == 'true'
+return 1
+else
+return 0]]></field-expr>
+                        <field-expr><![CDATA[enemy_prev_hp]]></field-expr>
+                        <field-expr><![CDATA[event_time]]></field-expr>
+                        <field-expr><![CDATA[fight_id]]></field-expr>
+                        <field-expr><![CDATA[if missed == 'true'
+return 1
+else
+return 0]]></field-expr>
+                        <field-expr><![CDATA[overkill_amt]]></field-expr>
+                        <field-expr><![CDATA[party_id]]></field-expr>
+                        <field-expr><![CDATA[player_instance_id]]></field-expr>
+                    </output>
+                </window-compute>
+                <window-compute name="enemy_compute">
+                    <schema>
+                        <fields>
+                            <field name="en_enemy_name" type="string"/>
+                            <field name="en_alive" type="int32"/>
+                            <field name="en_block_amount" type="double"/>
+                            <field name="en_block_chance" type="double"/>
+                            <field name="en_can_block" type="int32"/>
+                            <field name="en_can_dodge" type="int32"/>
+                            <field name="en_can_parry" type="int32"/>
+                            <field name="en_dodge_chance" type="double"/>
+                            <field name="en_experience_worth" type="int32"/>
+                            <field name="en_gold_value" type="double"/>
+                            <field name="en_hit_points" type="int32"/>
+                            <field name="en_enemy_level" type="int32"/>
+                            <field name="en_original_hit_points" type="int32"/>
+                            <field name="en_parry_chance" type="double"/>
+                            <field name="en_previous_hp" type="int32"/>
+                            <field name="en_race" type="string"/>
+                            <field name="enemy_id" type="int64" key="true"/>
+                        </fields>
+                    </schema>
+                    <output>
+                        <field-expr><![CDATA[name]]></field-expr>
+                        <field-expr><![CDATA[if alive == 'true'
+return 1
+else
+return 0]]></field-expr>
+                        <field-expr><![CDATA[block_amount]]></field-expr>
+                        <field-expr><![CDATA[block_chance]]></field-expr>
+                        <field-expr><![CDATA[if can_block == 'true'
+return 1
+else
+return 0]]></field-expr>
+                        <field-expr><![CDATA[if can_dodge == 'true'
+return 1
+else
+return 0]]></field-expr>
+                        <field-expr><![CDATA[if can_parry == 'true'
+return 1
+else
+return 0]]></field-expr>
+                        <field-expr><![CDATA[dodge_chance]]></field-expr>
+                        <field-expr><![CDATA[experience_worth]]></field-expr>
+                        <field-expr><![CDATA[gold_value]]></field-expr>
+                        <field-expr><![CDATA[hit_points]]></field-expr>
+                        <field-expr><![CDATA[level]]></field-expr>
+                        <field-expr><![CDATA[original_hit_points]]></field-expr>
+                        <field-expr><![CDATA[parry_chance]]></field-expr>
+                        <field-expr><![CDATA[previous_hp]]></field-expr>
+                        <field-expr><![CDATA[race]]></field-expr>
+                    </output>
+                </window-compute>
+                <window-compute name="fight_compute">
+                    <schema>
+                        <fields>
+                            <field name="fight_cr_date" type="string"/>
+                            <field name="fight_party_id" type="int64"/>
+                            <field name="fight_enemy_id" type="int64"/>
+                            <field name="fight_id" type="int64" key="true"/>
+                        </fields>
+                    </schema>
+                    <output>
+                        <field-expr><![CDATA[cr_date]]></field-expr>
+                        <field-expr><![CDATA[party_id]]></field-expr>
+                        <field-expr><![CDATA[enemy_id]]></field-expr>
+                    </output>
+                </window-compute>
+                <window-compute pubsub="true" name="player_compute">
+                    <schema>
+                        <fields>
+                            <field name="player_name" type="string"/>
+                            <field name="player_shoulders_slot" type="int32"/>
+                            <field name="player_head_slot" type="int32"/>
+                            <field name="player_back_slot" type="int32"/>
+                            <field name="player_chest_slot" type="int32"/>
+                            <field name="player_both_hand_slot" type="int32"/>
+                            <field name="player_hands_slot" type="int32"/>
+                            <field name="player_feet_slot" type="int32"/>
+                            <field name="player_legs_slot" type="int32"/>
+                            <field name="player_main_hand_slot" type="int32"/>
+                            <field name="player_off_hand_slot" type="int32"/>
+                            <field name="player_base_min_damage" type="int32"/>
+                            <field name="player_level" type="int32"/>
+                            <field name="player_min_damage" type="int32"/>
+                            <field name="player_base_max_damage" type="int32"/>
+                            <field name="player_base_critical_chance" type="double"/>
+                            <field name="player_max_damage" type="int32"/>
+                            <field name="player_critical_chance" type="double"/>
+                            <field name="player_miss_chance" type="double"/>
+                            <field name="player_critical_multiplier" type="double"/>
+                            <field name="party_id" type="int64"/>
+                            <field name="player_id" type="int32" key="true"/>
+                            <field name="player_instance_id" type="int64" key="true"/>
+                            <field name="party_name" type="string"/>
+                            <field name="party_cr_date" type="string"/>
+                        </fields>
+                    </schema>
+                    <output>
+                        <field-expr><![CDATA[name]]></field-expr>
+                        <field-expr><![CDATA[shoulders_slot]]></field-expr>
+                        <field-expr><![CDATA[head_slot]]></field-expr>
+                        <field-expr><![CDATA[back_slot]]></field-expr>
+                        <field-expr><![CDATA[chest_slot]]></field-expr>
+                        <field-expr><![CDATA[both_hand_slot]]></field-expr>
+                        <field-expr><![CDATA[hands_slot]]></field-expr>
+                        <field-expr><![CDATA[feet_slot]]></field-expr>
+                        <field-expr><![CDATA[legs_slot]]></field-expr>
+                        <field-expr><![CDATA[main_hand_slot]]></field-expr>
+                        <field-expr><![CDATA[off_hand_slot]]></field-expr>
+                        <field-expr><![CDATA[base_min_damage]]></field-expr>
+                        <field-expr><![CDATA[level]]></field-expr>
+                        <field-expr><![CDATA[min_damage]]></field-expr>
+                        <field-expr><![CDATA[base_max_damage]]></field-expr>
+                        <field-expr><![CDATA[base_critical_chance]]></field-expr>
+                        <field-expr><![CDATA[max_damage]]></field-expr>
+                        <field-expr><![CDATA[critical_chance]]></field-expr>
+                        <field-expr><![CDATA[miss_chance]]></field-expr>
+                        <field-expr><![CDATA[critical_multiplier]]></field-expr>
+                        <field-expr><![CDATA[p_party_id]]></field-expr>
+                        <field-expr><![CDATA[party_name]]></field-expr>
+                        <field-expr><![CDATA[party_cr_date]]></field-expr>
+                    </output>
+                </window-compute>
+                <window-aggregate pubsub="true" name="fight_summary">
+                    <schema>
+                        <fields>
+                            <field name="fight_id" type="int64" key="true"/>
+                            <field name="fight_cr_date" type="string"/>
+                            <field name="gross_attack_amt" type="int32"/>
+                            <field name="att_base_attack_amt" type="int32"/>
+                            <field name="blocked_att_count" type="int32"/>
+                            <field name="total_blocked_amt" type="int32"/>
+                            <field name="critical_att_count" type="int32"/>
+                            <field name="dodged_att_count" type="int32"/>
+                            <field name="attack_missed_amt" type="int32"/>
+                            <field name="total_overkill_amt" type="int32"/>
+                            <field name="net_damage_amt" type="int32"/>
+                            <field name="avg_att_attack_amt" type="int32"/>
+                            <field name="avg_net_damage" type="int32"/>
+                            <field name="avg_blocked_amt" type="int32"/>
+                            <field name="att_enemy_hp" type="int32"/>
+                        </fields>
+                    </schema>
+                    <output>
+                        <field-expr><![CDATA[ESP_aLast(fight_cr_date)]]></field-expr>
+                        <field-expr><![CDATA[ESP_aSum(att_attack_amt)]]></field-expr>
+                        <field-expr><![CDATA[ESP_aSum(att_base_attack_amt)]]></field-expr>
+                        <field-expr><![CDATA[ESP_aSum(att_blocked)]]></field-expr>
+                        <field-expr><![CDATA[ESP_aSum(att_blocked_amt)]]></field-expr>
+                        <field-expr><![CDATA[ESP_aSum(att_critical)]]></field-expr>
+                        <field-expr><![CDATA[ESP_aSum(att_dodged)]]></field-expr>
+                        <field-expr><![CDATA[ESP_aSum(att_missed)]]></field-expr>
+                        <field-expr><![CDATA[ESP_aSum(att_overkill_amt)]]></field-expr>
+                        <field-expr><![CDATA[ESP_aSum(net_damage)]]></field-expr>
+                        <field-expr><![CDATA[ESP_aAve(att_attack_amt)]]></field-expr>
+                        <field-expr><![CDATA[ESP_aAve(net_damage)]]></field-expr>
+                        <field-expr><![CDATA[ESP_aAve(att_blocked_amt)]]></field-expr>
+                        <field-expr><![CDATA[ESP_aLast(att_enemy_hp)]]></field-expr>
+                    </output>
+                </window-aggregate>
+                <window-compute name="fight_summary_compute">
+                    <schema>
+                        <fields>
+                            <field name="att_attack_amt" type="int32"/>
+                            <field name="att_base_attack_amt" type="int32"/>
+                            <field name="att_blocked" type="int32"/>
+                            <field name="att_blocked_amt" type="int32"/>
+                            <field name="att_critical" type="int32"/>
+                            <field name="att_dodged" type="int32"/>
+                            <field name="att_enemy_hp" type="int32"/>
+                            <field name="att_enemy_is_dead" type="int32"/>
+                            <field name="att_enemy_prev_hp" type="int32"/>
+                            <field name="att_event_time" type="string"/>
+                            <field name="att_missed" type="int32"/>
+                            <field name="att_overkill_amt" type="int32"/>
+                            <field name="party_name" type="string"/>
+                            <field name="en_enemy_name" type="string"/>
+                            <field name="en_race" type="string"/>
+                            <field name="net_damage" type="int32"/>
+                            <field name="fight_cr_date" type="string"/>
+                            <field name="fight_id" type="int64" key="true"/>
+                            <field name="attack_id" type="int64" key="true"/>
+                        </fields>
+                    </schema>
+                    <output>
+                        <field-expr><![CDATA[att_attack_amt]]></field-expr>
+                        <field-expr><![CDATA[att_base_attack_amt]]></field-expr>
+                        <field-expr><![CDATA[att_blocked]]></field-expr>
+                        <field-expr><![CDATA[att_blocked_amt]]></field-expr>
+                        <field-expr><![CDATA[att_critical]]></field-expr>
+                        <field-expr><![CDATA[att_dodged]]></field-expr>
+                        <field-expr><![CDATA[att_enemy_hp]]></field-expr>
+                        <field-expr><![CDATA[att_enemy_is_dead]]></field-expr>
+                        <field-expr><![CDATA[att_enemy_prev_hp]]></field-expr>
+                        <field-expr><![CDATA[att_event_time]]></field-expr>
+                        <field-expr><![CDATA[att_missed]]></field-expr>
+                        <field-expr><![CDATA[att_overkill_amt]]></field-expr>
+                        <field-expr><![CDATA[party_name]]></field-expr>
+                        <field-expr><![CDATA[en_enemy_name]]></field-expr>
+                        <field-expr><![CDATA[en_race]]></field-expr>
+                        <field-expr><![CDATA[att_attack_amt - att_blocked_amt - att_overkill_amt]]></field-expr>
+                        <field-expr><![CDATA[fight_cr_date]]></field-expr>
+                    </output>
+                </window-compute>
+                <window-join name="join_figh_enemy">
+                    <description><![CDATA[Joines the Fight object to its Enemy]]></description>
+                    <join type="inner">
+                        <conditions>
+                            <fields left="fight_enemy_id" right="enemy_id"/>
+                        </conditions>
+                    </join>
+                    <output>
+                        <field-expr name="fight_cr_date" type="string"><![CDATA[l_fight_cr_date]]></field-expr>
+                        <field-expr name="fight_party_id" type="int64"><![CDATA[l_fight_party_id]]></field-expr>
+                        <field-expr name="en_enemy_name" type="string"><![CDATA[r_en_enemy_name]]></field-expr>
+                        <field-expr name="en_alive" type="int32"><![CDATA[r_en_alive]]></field-expr>
+                        <field-expr name="en_block_amount" type="double"><![CDATA[r_en_block_amount]]></field-expr>
+                        <field-expr name="en_block_chance" type="double"><![CDATA[r_en_block_chance]]></field-expr>
+                        <field-expr name="en_can_block" type="int32"><![CDATA[r_en_can_block]]></field-expr>
+                        <field-expr name="en_can_dodge" type="int32"><![CDATA[r_en_can_dodge]]></field-expr>
+                        <field-expr name="en_can_parry" type="int32"><![CDATA[r_en_can_parry]]></field-expr>
+                        <field-expr name="en_dodge_chance" type="double"><![CDATA[r_en_dodge_chance]]></field-expr>
+                        <field-expr name="en_experience_worth" type="int32">
+                            <![CDATA[r_en_experience_worth]]></field-expr>
+                        <field-expr name="en_gold_value" type="double"><![CDATA[r_en_gold_value]]></field-expr>
+                        <field-expr name="en_hit_points" type="int32"><![CDATA[r_en_hit_points]]></field-expr>
+                        <field-expr name="en_enemy_level" type="int32"><![CDATA[r_en_enemy_level]]></field-expr>
+                        <field-expr name="en_original_hit_points" type="int32">
+                            <![CDATA[r_en_original_hit_points]]></field-expr>
+                        <field-expr name="en_parry_chance" type="double"><![CDATA[r_en_parry_chance]]></field-expr>
+                        <field-expr name="en_previous_hp" type="int32"><![CDATA[r_en_previous_hp]]></field-expr>
+                        <field-expr name="en_race" type="string"><![CDATA[r_en_race]]></field-expr>
+                        <field-expr name="fight_enemy_id" type="int64"><![CDATA[l_fight_enemy_id]]></field-expr>
+                    </output>
+                </window-join>
+                <window-join name="join_fight_partyDetails">
+                    <description><![CDATA[Joins the fight information to the player party]]></description>
+                    <join type="inner">
+                        <conditions>
+                            <fields left="fight_party_id" right="party_id"/>
+                        </conditions>
+                    </join>
+                    <output>
+                        <field-expr name="fight_cr_date" type="string"><![CDATA[l_fight_cr_date]]></field-expr>
+                        <field-expr name="en_enemy_name" type="string"><![CDATA[l_en_enemy_name]]></field-expr>
+                        <field-expr name="en_alive" type="int32"><![CDATA[l_en_alive]]></field-expr>
+                        <field-expr name="en_block_amount" type="double"><![CDATA[l_en_block_amount]]></field-expr>
+                        <field-expr name="en_block_chance" type="double"><![CDATA[l_en_block_chance]]></field-expr>
+                        <field-expr name="en_can_block" type="int32"><![CDATA[l_en_can_block]]></field-expr>
+                        <field-expr name="en_can_dodge" type="int32"><![CDATA[l_en_can_dodge]]></field-expr>
+                        <field-expr name="en_can_parry" type="int32"><![CDATA[l_en_can_parry]]></field-expr>
+                        <field-expr name="en_dodge_chance" type="double"><![CDATA[l_en_dodge_chance]]></field-expr>
+                        <field-expr name="en_experience_worth" type="int32">
+                            <![CDATA[l_en_experience_worth]]></field-expr>
+                        <field-expr name="en_gold_value" type="double"><![CDATA[l_en_gold_value]]></field-expr>
+                        <field-expr name="en_hit_points" type="int32"><![CDATA[l_en_hit_points]]></field-expr>
+                        <field-expr name="en_enemy_level" type="int32"><![CDATA[l_en_enemy_level]]></field-expr>
+                        <field-expr name="en_original_hit_points" type="int32">
+                            <![CDATA[l_en_original_hit_points]]></field-expr>
+                        <field-expr name="en_parry_chance" type="double"><![CDATA[l_en_parry_chance]]></field-expr>
+                        <field-expr name="en_previous_hp" type="int32"><![CDATA[l_en_previous_hp]]></field-expr>
+                        <field-expr name="en_race" type="string"><![CDATA[l_en_race]]></field-expr>
+                        <field-expr name="party_name" type="string"><![CDATA[r_party_name]]></field-expr>
+                        <field-expr name="party_cr_date" type="string"><![CDATA[r_party_cr_date]]></field-expr>
+                        <field-expr name="player_name" type="string"><![CDATA[r_player_name]]></field-expr>
+                        <field-expr name="player_shoulders_slot" type="int32">
+                            <![CDATA[r_player_shoulders_slot]]></field-expr>
+                        <field-expr name="player_head_slot" type="int32"><![CDATA[r_player_head_slot]]></field-expr>
+                        <field-expr name="player_back_slot" type="int32"><![CDATA[r_player_back_slot]]></field-expr>
+                        <field-expr name="player_chest_slot" type="int32"><![CDATA[r_player_chest_slot]]></field-expr>
+                        <field-expr name="player_both_hand_slot" type="int32">
+                            <![CDATA[r_player_both_hand_slot]]></field-expr>
+                        <field-expr name="player_hands_slot" type="int32"><![CDATA[r_player_hands_slot]]></field-expr>
+                        <field-expr name="player_feet_slot" type="int32"><![CDATA[r_player_feet_slot]]></field-expr>
+                        <field-expr name="player_legs_slot" type="int32"><![CDATA[r_player_legs_slot]]></field-expr>
+                        <field-expr name="player_main_hand_slot" type="int32">
+                            <![CDATA[r_player_main_hand_slot]]></field-expr>
+                        <field-expr name="player_off_hand_slot" type="int32">
+                            <![CDATA[r_player_off_hand_slot]]></field-expr>
+                        <field-expr name="player_base_min_damage" type="int32">
+                            <![CDATA[r_player_base_min_damage]]></field-expr>
+                        <field-expr name="player_level" type="int32"><![CDATA[r_player_level]]></field-expr>
+                        <field-expr name="player_min_damage" type="int32"><![CDATA[r_player_min_damage]]></field-expr>
+                        <field-expr name="player_base_max_damage" type="int32">
+                            <![CDATA[r_player_base_max_damage]]></field-expr>
+                        <field-expr name="player_base_critical_chance" type="double">
+                            <![CDATA[r_player_base_critical_chance]]></field-expr>
+                        <field-expr name="player_max_damage" type="int32"><![CDATA[r_player_max_damage]]></field-expr>
+                        <field-expr name="player_critical_chance" type="double">
+                            <![CDATA[r_player_critical_chance]]></field-expr>
+                        <field-expr name="player_miss_chance" type="double">
+                            <![CDATA[r_player_miss_chance]]></field-expr>
+                        <field-expr name="player_critical_multiplier" type="double">
+                            <![CDATA[r_player_critical_multiplier]]></field-expr>
+                        <field-expr name="party_id" type="int64"><![CDATA[r_party_id]]></field-expr>
+                    </output>
+                </window-join>
+                <window-join pubsub="true" name="join_playerFight_attacks">
+                    <description><![CDATA[Joines the player fight information to the attacks]]></description>
+                    <join type="inner">
+                        <conditions>
+                            <fields left="fight_id" right="att_fight_id"/>
+                            <fields left="party_id" right="att_party_id"/>
+                            <fields left="player_instance_id" right="att_player_instance_id"/>
+                        </conditions>
+                    </join>
+                    <output>
+                        <field-expr name="fight_cr_date" type="string"><![CDATA[l_fight_cr_date]]></field-expr>
+                        <field-expr name="en_enemy_name" type="string"><![CDATA[l_en_enemy_name]]></field-expr>
+                        <field-expr name="en_block_amount" type="double"><![CDATA[l_en_block_amount]]></field-expr>
+                        <field-expr name="en_block_chance" type="double"><![CDATA[l_en_block_chance]]></field-expr>
+                        <field-expr name="en_can_block" type="int32"><![CDATA[l_en_can_block]]></field-expr>
+                        <field-expr name="en_can_dodge" type="int32"><![CDATA[l_en_can_dodge]]></field-expr>
+                        <field-expr name="en_can_parry" type="int32"><![CDATA[l_en_can_parry]]></field-expr>
+                        <field-expr name="en_dodge_chance" type="double"><![CDATA[l_en_dodge_chance]]></field-expr>
+                        <field-expr name="en_experience_worth" type="int32">
+                            <![CDATA[l_en_experience_worth]]></field-expr>
+                        <field-expr name="en_gold_value" type="double"><![CDATA[l_en_gold_value]]></field-expr>
+                        <field-expr name="en_hit_points" type="int32"><![CDATA[l_en_hit_points]]></field-expr>
+                        <field-expr name="en_enemy_level" type="int32"><![CDATA[l_en_enemy_level]]></field-expr>
+                        <field-expr name="en_original_hit_points" type="int32">
+                            <![CDATA[l_en_original_hit_points]]></field-expr>
+                        <field-expr name="en_parry_chance" type="double"><![CDATA[l_en_parry_chance]]></field-expr>
+                        <field-expr name="en_previous_hp" type="int32"><![CDATA[l_en_previous_hp]]></field-expr>
+                        <field-expr name="en_race" type="string"><![CDATA[l_en_race]]></field-expr>
+                        <field-expr name="party_name" type="string"><![CDATA[l_party_name]]></field-expr>
+                        <field-expr name="party_cr_date" type="string"><![CDATA[l_party_cr_date]]></field-expr>
+                        <field-expr name="player_name" type="string"><![CDATA[l_player_name]]></field-expr>
+                        <field-expr name="player_shoulders_slot" type="int32">
+                            <![CDATA[l_player_shoulders_slot]]></field-expr>
+                        <field-expr name="player_head_slot" type="int32"><![CDATA[l_player_head_slot]]></field-expr>
+                        <field-expr name="player_back_slot" type="int32"><![CDATA[l_player_back_slot]]></field-expr>
+                        <field-expr name="player_chest_slot" type="int32"><![CDATA[l_player_chest_slot]]></field-expr>
+                        <field-expr name="player_both_hand_slot" type="int32">
+                            <![CDATA[l_player_both_hand_slot]]></field-expr>
+                        <field-expr name="player_hands_slot" type="int32"><![CDATA[l_player_hands_slot]]></field-expr>
+                        <field-expr name="player_feet_slot" type="int32"><![CDATA[l_player_feet_slot]]></field-expr>
+                        <field-expr name="player_legs_slot" type="int32"><![CDATA[l_player_legs_slot]]></field-expr>
+                        <field-expr name="player_main_hand_slot" type="int32">
+                            <![CDATA[l_player_main_hand_slot]]></field-expr>
+                        <field-expr name="player_off_hand_slot" type="int32">
+                            <![CDATA[l_player_off_hand_slot]]></field-expr>
+                        <field-expr name="player_base_min_damage" type="int32">
+                            <![CDATA[l_player_base_min_damage]]></field-expr>
+                        <field-expr name="player_level" type="int32"><![CDATA[l_player_level]]></field-expr>
+                        <field-expr name="player_min_damage" type="int32"><![CDATA[l_player_min_damage]]></field-expr>
+                        <field-expr name="player_base_max_damage" type="int32">
+                            <![CDATA[l_player_base_max_damage]]></field-expr>
+                        <field-expr name="player_base_critical_chance" type="double">
+                            <![CDATA[l_player_base_critical_chance]]></field-expr>
+                        <field-expr name="player_max_damage" type="int32"><![CDATA[l_player_max_damage]]></field-expr>
+                        <field-expr name="player_critical_chance" type="double">
+                            <![CDATA[l_player_critical_chance]]></field-expr>
+                        <field-expr name="player_miss_chance" type="double">
+                            <![CDATA[l_player_miss_chance]]></field-expr>
+                        <field-expr name="player_critical_multiplier" type="double">
+                            <![CDATA[l_player_critical_multiplier]]></field-expr>
+                        <field-expr name="att_attack_amt" type="int32"><![CDATA[r_att_attack_amt]]></field-expr>
+                        <field-expr name="att_base_attack_amt" type="int32">
+                            <![CDATA[r_att_base_attack_amt]]></field-expr>
+                        <field-expr name="att_blocked" type="int32"><![CDATA[r_att_blocked]]></field-expr>
+                        <field-expr name="att_blocked_amt" type="int32"><![CDATA[r_att_blocked_amt]]></field-expr>
+                        <field-expr name="att_critical" type="int32"><![CDATA[r_att_critical]]></field-expr>
+                        <field-expr name="att_dodged" type="int32"><![CDATA[r_att_dodged]]></field-expr>
+                        <field-expr name="att_enemy_base_hp" type="int32"><![CDATA[r_att_enemy_base_hp]]></field-expr>
+                        <field-expr name="att_enemy_hp" type="int32"><![CDATA[r_att_enemy_hp]]></field-expr>
+                        <field-expr name="att_enemy_is_dead" type="int32"><![CDATA[r_att_enemy_is_dead]]></field-expr>
+                        <field-expr name="att_enemy_prev_hp" type="int32"><![CDATA[r_att_enemy_prev_hp]]></field-expr>
+                        <field-expr name="att_event_time" type="string"><![CDATA[r_att_event_time]]></field-expr>
+                        <field-expr name="att_missed" type="int32"><![CDATA[r_att_missed]]></field-expr>
+                        <field-expr name="att_overkill_amt" type="int32"><![CDATA[r_att_overkill_amt]]></field-expr>
+                        <field-expr name="party_id" type="int64"><![CDATA[l_party_id]]></field-expr>
+                    </output>
+                </window-join>
+                <window-calculate pubsub="true" name="attack_time_variables" algorithm="MAS">
+                    <schema>
+                        <fields>
+                            <field name="fight_cr_date" type="string"/>
+                            <field name="en_enemy_name" type="string"/>
+                            <field name="en_block_amount" type="double"/>
+                            <field name="en_block_chance" type="double"/>
+                            <field name="en_can_block" type="int32"/>
+                            <field name="en_can_dodge" type="int32"/>
+                            <field name="en_can_parry" type="int32"/>
+                            <field name="en_dodge_chance" type="double"/>
+                            <field name="en_experience_worth" type="int32"/>
+                            <field name="en_gold_value" type="double"/>
+                            <field name="en_hit_points" type="int32"/>
+                            <field name="en_enemy_level" type="int32"/>
+                            <field name="en_original_hit_points" type="int32"/>
+                            <field name="en_parry_chance" type="double"/>
+                            <field name="en_previous_hp" type="int32"/>
+                            <field name="en_race" type="string"/>
+                            <field name="party_name" type="string"/>
+                            <field name="party_cr_date" type="string"/>
+                            <field name="player_name" type="string"/>
+                            <field name="player_shoulders_slot" type="int32"/>
+                            <field name="player_head_slot" type="int32"/>
+                            <field name="player_back_slot" type="int32"/>
+                            <field name="player_chest_slot" type="int32"/>
+                            <field name="player_both_hand_slot" type="int32"/>
+                            <field name="player_hands_slot" type="int32"/>
+                            <field name="player_feet_slot" type="int32"/>
+                            <field name="player_legs_slot" type="int32"/>
+                            <field name="player_main_hand_slot" type="int32"/>
+                            <field name="player_off_hand_slot" type="int32"/>
+                            <field name="player_base_min_damage" type="int32"/>
+                            <field name="player_level" type="int32"/>
+                            <field name="player_min_damage" type="int32"/>
+                            <field name="player_base_max_damage" type="int32"/>
+                            <field name="player_base_critical_chance" type="double"/>
+                            <field name="player_max_damage" type="int32"/>
+                            <field name="player_critical_chance" type="double"/>
+                            <field name="player_miss_chance" type="double"/>
+                            <field name="player_critical_multiplier" type="double"/>
+                            <field name="att_attack_amt" type="int32"/>
+                            <field name="att_base_attack_amt" type="int32"/>
+                            <field name="att_blocked" type="int32"/>
+                            <field name="att_blocked_amt" type="int32"/>
+                            <field name="att_critical" type="int32"/>
+                            <field name="att_dodged" type="int32"/>
+                            <field name="att_enemy_base_hp" type="int32"/>
+                            <field name="att_enemy_hp" type="int32"/>
+                            <field name="att_enemy_is_dead" type="int32"/>
+                            <field name="att_enemy_prev_hp" type="int32"/>
+                            <field name="att_event_time" type="string"/>
+                            <field name="att_missed" type="int32"/>
+                            <field name="att_overkill_amt" type="int32"/>
+                            <field name="fight_id" type="int64"/>
+                            <field name="party_id" type="int64"/>
+                            <field name="player_id" type="int32"/>
+                            <field name="player_instance_id" type="int64"/>
+                            <field name="attack_id" type="int64" key="true"/>
+                            <field name="att_year" type="int32"/>
+                            <field name="att_month" type="int32"/>
+                            <field name="att_day" type="int32"/>
+                            <field name="att_hour" type="int32"/>
+                            <field name="att_min" type="int32"/>
+                            <field name="att_sec" type="int32"/>
+                            <field name="att_ms" type="int32"/>
+                            <field name="att_timestamp" type="stamp"/>
+                            <field name="att_date" type="date"/>
+                            <field name="att_datetime" type="date"/>
+                        </fields>
+                    </schema>
+                    <mas-map>
+                        <window-map module="python_module" function="get_att_event_time_tokens" revision="0"
+                                    source="join_playerFight_attacks"/>
+                    </mas-map>
+                </window-calculate>
+                <window-calculate name="normalized_party" algorithm="MAS">
+                    <schema>
+                        <fields>
+                            <field name="p_party_id" type="int64" key="true"/>
+                            <field name="party_member_inst_id" type="int64" key="true"/>
+                            <field name="party_name" type="string"/>
+                            <field name="party_cr_date" type="string"/>
+                        </fields>
+                    </schema>
+                    <mas-map>
+                        <window-map module="party_python" function="normalize_party" revision="0"
+                                    source="rpggame_parties_source"/>
+                    </mas-map>
+                </window-calculate>
+                <window-join pubsub="true" name="join_player_party">
+                    <join type="inner">
+                        <conditions>
+                            <fields left="player_instance_id" right="party_member_inst_id"/>
+                        </conditions>
+                    </join>
+                    <output>
+                        <field-expr name="name" type="string"><![CDATA[l_name]]></field-expr>
+                        <field-expr name="shoulders_slot" type="int32"><![CDATA[l_shoulders_slot]]></field-expr>
+                        <field-expr name="head_slot" type="int32"><![CDATA[l_head_slot]]></field-expr>
+                        <field-expr name="back_slot" type="int32"><![CDATA[l_back_slot]]></field-expr>
+                        <field-expr name="chest_slot" type="int32"><![CDATA[l_chest_slot]]></field-expr>
+                        <field-expr name="both_hand_slot" type="int32"><![CDATA[l_both_hand_slot]]></field-expr>
+                        <field-expr name="hands_slot" type="int32"><![CDATA[l_hands_slot]]></field-expr>
+                        <field-expr name="feet_slot" type="int32"><![CDATA[l_feet_slot]]></field-expr>
+                        <field-expr name="legs_slot" type="int32"><![CDATA[l_legs_slot]]></field-expr>
+                        <field-expr name="main_hand_slot" type="int32"><![CDATA[l_main_hand_slot]]></field-expr>
+                        <field-expr name="off_hand_slot" type="int32"><![CDATA[l_off_hand_slot]]></field-expr>
+                        <field-expr name="base_min_damage" type="int32"><![CDATA[l_base_min_damage]]></field-expr>
+                        <field-expr name="level" type="int32"><![CDATA[l_level]]></field-expr>
+                        <field-expr name="min_damage" type="int32"><![CDATA[l_min_damage]]></field-expr>
+                        <field-expr name="base_max_damage" type="int32"><![CDATA[l_base_max_damage]]></field-expr>
+                        <field-expr name="base_critical_chance" type="double">
+                            <![CDATA[l_base_critical_chance]]></field-expr>
+                        <field-expr name="max_damage" type="int32"><![CDATA[l_max_damage]]></field-expr>
+                        <field-expr name="critical_chance" type="double"><![CDATA[l_critical_chance]]></field-expr>
+                        <field-expr name="miss_chance" type="double"><![CDATA[l_miss_chance]]></field-expr>
+                        <field-expr name="critical_multiplier" type="double">
+                            <![CDATA[l_critical_multiplier]]></field-expr>
+                        <field-expr name="party_name" type="string"><![CDATA[r_party_name]]></field-expr>
+                        <field-expr name="party_cr_date" type="string"><![CDATA[r_party_cr_date]]></field-expr>
+                    </output>
+                </window-join>
+            </windows>
+            <edges>
+                <edge source="rpggame_attack_source" target="attack_compute"/>
+                <edge source="rpggame_enemy_source" target="enemy_compute"/>
+                <edge source="rpggame_fight_source" target="fight_compute"/>
+                <edge source="fight_summary_compute" target="fight_summary"/>
+                <edge source="fight_compute" target="join_figh_enemy" role="left"/>
+                <edge source="enemy_compute" target="join_figh_enemy" role="right"/>
+                <edge source="join_figh_enemy" target="join_fight_partyDetails" role="left"/>
+                <edge source="player_compute" target="join_fight_partyDetails" role="right"/>
+                <edge source="join_fight_partyDetails" target="join_playerFight_attacks" role="left"/>
+                <edge source="attack_compute" target="join_playerFight_attacks" role="right"/>
+                <edge source="join_playerFight_attacks" target="fight_summary_compute"/>
+                <edge source="join_playerFight_attacks" target="attack_time_variables" role="data"/>
+                <edge source="rpggame_parties_source" target="normalized_party" role="data"/>
+                <edge source="rpggame_player_source" target="join_player_party" role="left"/>
+                <edge source="normalized_party" target="join_player_party" role="right"/>
+                <edge source="join_player_party" target="player_compute"/>
+            </edges>
+        </contquery>
+    </contqueries>
+</project>

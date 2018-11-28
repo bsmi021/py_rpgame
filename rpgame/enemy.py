@@ -9,7 +9,7 @@ class Enemy(object):
                  race: str = None):
         self.id = hash(uuid.uuid4())
         self.name = '{}_{}[{}]'.format(name, self.id, level)
-        self.hit_points: int = round(((hit_points * (1 + level * .1)) * 17.5))
+        self.hit_points: int = round(((hit_points * (1 + level * .1)) * 25.5))
         self.original_hit_points: int = self.hit_points
         self.previous_hp: int = self.hit_points
         self.race = race

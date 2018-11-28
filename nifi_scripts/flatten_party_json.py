@@ -32,12 +32,13 @@ class ModJSON(StreamCallback):
         outputStream.write(bytearray(json.dumps(obj).encode('utf-8')))
 
 
-flowFile = session.get()
+flowFiles = session.get()
 
-if flowFile is not None:  # process only if there actually is a flowFile
-    flowFile = session.write(flowFile, ModJSON())
-    flowFile = session.putAttribute(flowFile, "filename",
-                                    flowFile.getAttribute('filename').split('.')[0] + '_translated.json')
+for flowFile in flowFiles:
+    if flowFile is not None:  # process only if there actually is a flowFile
+        flowFile = session.write(flowFile, ModJSON())
+        flowFile = session.putAttribute(flowFile, "filename",
+                                        flowFile.getAttribute('filename').split('.')[0] + '_translated.json')
 
-    session.transfer(flowFile, REL_SUCCESS)
-    session.commit()
+        session.transfer(flowFile, REL_SUCCESS)
+session.commit()

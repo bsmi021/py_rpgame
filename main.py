@@ -18,8 +18,7 @@ def run_fight_sim(f_fight: combat.Fight, f_send_to_kafka: bool):
 
 
 def main():
-
-    fight_count = 30
+    fight_count = 50
     send_to_kafka = True
     kafka_producer = None
 
@@ -96,6 +95,7 @@ def main():
         players.append(playr)
         if send_to_kafka:
             kafka_produce_message(kafka_producer, rpgame.utils.player_topic, playr.get_json_string())
+            print('Player Registered:\n {0}'.format(playr.get_json_string()))
         else:
             print(playr.get_json_string())
 
@@ -110,6 +110,7 @@ def main():
             party.add_party_member(players.pop(random.randint(0, len(players) - 1)))
         if send_to_kafka:
             kafka_produce_message(kafka_producer, rpgame.utils.party_topic, party.get_json_string())
+            print('Party Registered:\n {0}'.format(party.get_json_string()))
         else:
             print(party.get_json_string())
 
@@ -123,6 +124,7 @@ def main():
         enemy = combat.get_random_enemy()
         if send_to_kafka:
             kafka_produce_message(kafka_producer, rpgame.utils.enemy_topic, enemy.get_json_string())
+            print('Enemy Registered:\n {0}'.format(enemy.get_json_string()))
         else:
             print(enemy.get_json_string())
 
@@ -131,6 +133,7 @@ def main():
 
         if send_to_kafka:
             kafka_produce_message(kafka_producer, rpgame.utils.fight_topic, fight.get_json_string())
+            print('Fight Registered:\n {0}'.format(fight.get_json_string()))
         else:
             print(fight.get_json_string())
 
