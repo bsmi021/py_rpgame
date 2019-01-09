@@ -1,0 +1,192 @@
+<project name="rpggame_demo_ml" threads="1" pubsub="auto" heartbeat-interval="1">
+    <description>
+        <![CDATA[Demonstrates several means of performing linear regression tasks on attack information.]]></description>
+    <metadata>
+        <meta id="studioUploadedBy">brwsmi</meta>
+        <meta id="studioUploaded">1546774976127</meta>
+        <meta id="studioModifiedBy">brwsmi</meta>
+        <meta id="studioModified">1546781042335</meta>
+        <meta id="studioTags">analytics, machine_learning, linear_regression, demo</meta>
+        <meta id="layout">
+            {"cq1":{"fl_attack_landed":{"x":-260,"y":-255},"w_attack_source":{"x":-260,"y":-385},"w_join_predictions":{"x":-260,"y":105},"w_predict_attack_amt":{"x":-400,"y":-60},"w_score_lr":{"x":-125,"y":-60},"w_train_lr":{"x":-15,"y":-165}}}
+        </meta>
+    </metadata>
+    <mas-modules>
+        <mas-module module="p_score_attacks" language="python" func-names="predict_attack_amt">
+            <description><![CDATA[Provides a method for predicting attack amount]]></description>
+            <code><![CDATA[import numpy as np
+from pickle import load
+import os
+
+model_file = '/data/models/p_attack_lr_v1.sav'
+loaded_model = load(open(model_file, 'rb'))
+
+def predict_attack_amt(attack_id, att_attack_amt, player_critical_chance, att_base_attack_amt,
+                player_min_damage, player_max_damage, att_blocked, att_critical, att_dodged, att_missed):
+    "Output: attack_id, att_attack_amt, predicted"
+
+    X = np.array([player_critical_chance, att_base_attack_amt,
+                  player_min_damage, player_max_damage, att_blocked, att_critical, att_dodged, att_missed])
+    predicted = loaded_model.predict(X[np.newaxis, :])
+    predicted = predicted[0][0]
+
+    return (attack_id, att_attack_amt, predicted)]]></code>
+        </mas-module>
+    </mas-modules>
+    <contqueries>
+        <contquery name="cq1">
+            <windows>
+                <window-source pubsub="true" insert-only="true" name="w_attack_source">
+                    <schema>
+                        <fields>
+                            <field name="fight_cr_date" type="string"/>
+                            <field name="en_enemy_name" type="string"/>
+                            <field name="en_block_amount" type="double"/>
+                            <field name="en_block_chance" type="double"/>
+                            <field name="en_can_block" type="int32"/>
+                            <field name="en_can_dodge" type="int32"/>
+                            <field name="en_can_parry" type="int32"/>
+                            <field name="en_dodge_chance" type="double"/>
+                            <field name="en_experience_worth" type="int32"/>
+                            <field name="en_gold_value" type="double"/>
+                            <field name="en_hit_points" type="int32"/>
+                            <field name="en_enemy_level" type="int32"/>
+                            <field name="en_original_hit_points" type="int32"/>
+                            <field name="en_parry_chance" type="double"/>
+                            <field name="en_previous_hp" type="int32"/>
+                            <field name="en_race" type="string"/>
+                            <field name="party_name" type="string"/>
+                            <field name="party_cr_date" type="string"/>
+                            <field name="player_name" type="string"/>
+                            <field name="player_shoulders_slot" type="int32"/>
+                            <field name="player_head_slot" type="int32"/>
+                            <field name="player_back_slot" type="int32"/>
+                            <field name="player_chest_slot" type="int32"/>
+                            <field name="player_both_hand_slot" type="int32"/>
+                            <field name="player_hands_slot" type="int32"/>
+                            <field name="player_feet_slot" type="int32"/>
+                            <field name="player_legs_slot" type="int32"/>
+                            <field name="player_main_hand_slot" type="int32"/>
+                            <field name="player_off_hand_slot" type="int32"/>
+                            <field name="player_base_min_damage" type="int32"/>
+                            <field name="player_level" type="int32"/>
+                            <field name="player_min_damage" type="int32"/>
+                            <field name="player_base_max_damage" type="int32"/>
+                            <field name="player_base_critical_chance" type="double"/>
+                            <field name="player_max_damage" type="int32"/>
+                            <field name="player_critical_chance" type="double"/>
+                            <field name="player_miss_chance" type="double"/>
+                            <field name="player_critical_multiplier" type="double"/>
+                            <field name="att_attack_amt" type="int32"/>
+                            <field name="att_base_attack_amt" type="int32"/>
+                            <field name="att_blocked" type="int32"/>
+                            <field name="att_blocked_amt" type="int32"/>
+                            <field name="att_critical" type="int32"/>
+                            <field name="att_dodged" type="int32"/>
+                            <field name="att_enemy_base_hp" type="int32"/>
+                            <field name="att_enemy_hp" type="int32"/>
+                            <field name="att_enemy_is_dead" type="int32"/>
+                            <field name="att_enemy_prev_hp" type="int32"/>
+                            <field name="att_event_time" type="string"/>
+                            <field name="att_missed" type="int32"/>
+                            <field name="att_overkill_amt" type="int32"/>
+                            <field name="fight_id" type="int64"/>
+                            <field name="party_id" type="int64"/>
+                            <field name="player_id" type="int32"/>
+                            <field name="player_instance_id" type="int64"/>
+                            <field name="attack_id" type="int64" key="true"/>
+                        </fields>
+                    </schema>
+                </window-source>
+                <window-train name="w_train_lr" pubsub="true" algorithm="LinearRegression">
+                    <description><![CDATA[Trains a Linear Regression model against RPG game attack data]]></description>
+                    <parameters>
+                        <properties>
+                            <property name="nInit"><![CDATA[100]]></property>
+                            <property name="dampingFactor"><![CDATA[0.8]]></property>
+                            <property name="commitInterval"><![CDATA[100]]></property>
+                            <property name="batchSize"><![CDATA[0]]></property>
+                            <property name="centerFlag"><![CDATA[0]]></property>
+                            <property name="scaleFlag"><![CDATA[0]]></property>
+                            <property name="modelChoice"><![CDATA[0]]></property>
+                            <property name="maxSparseIndex"><![CDATA[0]]></property>
+                        </properties>
+                    </parameters>
+                    <input-map>
+                        <properties>
+                            <property name="inputs">
+                                <![CDATA[att_attack_amt, player_critical_chance, att_base_attack_amt, player_min_damage, player_max_damage, att_blocked, att_critical, att_dodged, att_missed]]></property>
+                            <property name="target"><![CDATA[att_attack_amt]]></property>
+                        </properties>
+                    </input-map>
+                </window-train>
+                <window-score name="w_score_lr" pubsub="true">
+                    <description><![CDATA[Scores attack records using an online model]]></description>
+                    <schema>
+                        <fields>
+                            <field name="att_attack_amt" type="int32"/>
+                            <field name="attack_id" type="int64" key="true"/>
+                            <field name="predicted" type="double"/>
+                            <field name="model_id" type="int64"/>
+                        </fields>
+                    </schema>
+                    <models>
+                        <online algorithm="LinearRegression">
+                            <input-map>
+                                <properties>
+                                    <property name="inputs">
+                                        <![CDATA[att_attack_amt,player_critical_chance,att_base_attack_amt,player_min_damage,player_max_damage,att_blocked,att_critical,att_dodged,att_missed]]></property>
+                                </properties>
+                            </input-map>
+                            <output-map>
+                                <properties>
+                                    <property name="yPredictOut"><![CDATA[predicted]]></property>
+                                    <property name="modelIdOut"><![CDATA[model_id]]></property>
+                                </properties>
+                            </output-map>
+                        </online>
+                    </models>
+                </window-score>
+                <window-calculate pubsub="true" name="w_predict_attack_amt" algorithm="MAS">
+                    <description>
+                        <![CDATA[Uses Python MAS module to provide offline model prediction for attacks]]></description>
+                    <schema>
+                        <fields>
+                            <field name="attack_id" type="int64" key="true"/>
+                            <field name="att_attack_amt" type="int32"/>
+                            <field name="predicted" type="double"/>
+                        </fields>
+                    </schema>
+                    <mas-map>
+                        <window-map module="p_score_attacks" function="predict_attack_amt" revision="0"
+                                    source="fl_attack_landed"/>
+                    </mas-map>
+                </window-calculate>
+                <window-join pubsub="true" name="w_join_predictions">
+                    <join type="inner">
+                        <conditions>
+                            <fields left="attack_id" right="attack_id"/>
+                        </conditions>
+                    </join>
+                    <output>
+                        <field-expr name="att_attack_amt" type="int32"><![CDATA[l_att_attack_amt]]></field-expr>
+                        <field-expr name="py_predicted" type="double"><![CDATA[l_predicted]]></field-expr>
+                        <field-expr name="esp_predicted" type="double"><![CDATA[r_predicted]]></field-expr>
+                    </output>
+                </window-join>
+                <window-filter pubsub="true" name="fl_attack_landed">
+                    <expression><![CDATA[att_attack_amt > 0]]></expression>
+                </window-filter>
+            </windows>
+            <edges>
+                <edge source="w_train_lr" target="w_score_lr" role="model"/>
+                <edge source="w_predict_attack_amt" target="w_join_predictions" role="left"/>
+                <edge source="w_score_lr" target="w_join_predictions" role="right"/>
+                <edge source="w_attack_source" target="fl_attack_landed"/>
+                <edge source="fl_attack_landed" target="w_train_lr" role="data"/>
+                <edge source="fl_attack_landed" target="w_predict_attack_amt" role="data"/>
+                <edge source="fl_attack_landed" target="w_score_lr" role="data"/>
+            </edges>
+        </contquery>
+    </contqueries>
+</project>
