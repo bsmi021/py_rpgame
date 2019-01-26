@@ -11,14 +11,15 @@
     for the demo, again you can change this on your own implementation.
     """
 
+import os
 from pickle import load
 
 import numpy as np
 
-model_file = '/data/models/p_attack_lr_v1.sav'
-# model_file_path = os.path.join('data', os.path.join('models', model_file))
+model_file = 'p_attack_lr_v1.sav'
+model_file_path = os.path.join('data', os.path.join('models', model_file))
 
-loaded_model = load(open(model_file, 'rb'))
+loaded_model = load(open(model_file_path, 'rb'))
 
 
 def predict_attack_amt(attack_id, att_attack_amt, player_critical_chance, att_base_attack_amt,

@@ -5,35 +5,54 @@ from org.apache.commons.io import IOUtils
 from org.apache.nifi.processor.io import StreamCallback
 
 
-class ModJSON(StreamCallback):
+class ParseTweet(StreamCallback):
     def __init__(self):
         pass
 
-    def process(self, inputStream, outputStream):
+    def process(selfs, inputStream, outputStream):
         json_string = IOUtils.toString(inputStream, StandardCharsets.UTF_8)
-        obj = json.loads(json_string)
+        tweet_d = json.loads(json_string)
 
-        if obj["id"] is not None:
-            obj["player_id"] = obj["id"]
-            del (obj["id"])
+        if 'created_at' in tweet_d:
+            created_at = tweet_d['created_at']
+        else:
+            created_at = ''
 
-        if obj["instance_id"] is not None:
-            obj["player_instance_id"] = obj["instance_id"]
-            del (obj["instance_id"])
+        id = tweet_d['id']
+        text = tweet_d['text']
+        truncated = 0
+        if tweet_d['truncated']:
+            truncated = 1
+        user_id = tweet_d['user']['id']
+        user_name = tweet_d['user']['name']
+        user_screen_name = tweet_d['user']['screen_name']
+        if truncated == 1 and 'extended_tweet' in tweet_d:
+            full_text = tweet_d['extended_tweet']['full_text']
+        else:
+            full_text = ''
+        timestamp_ms = tweet_d['timestamp_ms']
 
-        if obj["equipped_items"] is not None:
-            for o in obj["equipped_items"]:
-                obj[str(o['slot_name']).lower() + '_slot'] = int(o['id'])
+        result_json = json.dumps(dict(id=id, timestamp_ms=int(timestamp_ms), created_at=created_at,
+                                      truncated=truncated, text=text, full_text=full_text,
+                                      user_id=user_id, screen_name=user_screen_name, name=user_name))
 
-        del (obj["equipped_items"])
-        outputStream.write(bytearray(json.dumps(obj).encode('utf-8')))
+        outputStream.write(bytearray(result_json.encode('utf-8')))
 
 
 flowFiles = session.get(1000)
 
 for flowFile in flowFiles:
-    if flowFile is not None:
-        flowFile = session.write(flowFile, ModJSON())
+    if flowFile is not None:  # process only if there actually is a flowFile
+        orig_flow_file = flowFile
+
+        if flowFile.getSize() == 0:
+            session.transfer(orig_flow_file, REL_FAILURE)
+
+        flowFile = session.write(flowFile, ParseTweet())
+
+        if flowFile.getSize() == 0:
+            session.transfer(orig_flow_file, REL_FAILURE)
+
         flowFile = session.putAttribute(flowFile, "filename",
                                         flowFile.getAttribute('filename').split('.')[0] + '_translated.json')
 
