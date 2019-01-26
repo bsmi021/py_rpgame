@@ -4,6 +4,12 @@ This project provides the various resources which are used to run a demonstratio
 
 *The intention of this project is not to teach you how to use any of the technologies below, it's strongly advised that you review information from the following links to gain clarity.*
 
+  * [SAS Event Stream Processing 5.2](https://documentation.sas.com/?cdcId=espcdc&cdcVersion=5.2&docsetId=espov&docsetTarget=home.htm&locale=en)
+  * [SAS Viya (various)](https://documentation.sas.com/?docsetId=helpcenterdefault&docsetTarget=surfedin.htm&docsetVersion=1.0)
+  * [Apache Kafka](https://kafka.apache.org/)
+  * [Apache NiFi](https://nifi.apache.org/)
+  * [Apache Flume](https://flume.apache.org/)
+
 ## Project Structure
 
 * [avro_schemas](https://github.com/bsmi021/rpgame2/tree/master/avro_schemas) - contains the various AVRO schemas which are used by NiFi for publishing events to SAS ESP<br><br>
@@ -38,6 +44,8 @@ Additionall the *data/models* folder contains the Python ML model file for the *
   
     *Note: change the local directory value, as well you may need to change the host port depending on your existing host port usage*<br>
     `docker run --name rpg_nifi -d -it -v (local directory):/usr/share -p 8080:8080 apache/nifi:1.6.0`
+    
+    Follow the instructions at [Setting Up Apache NiFi to Run with SAS Event Stream Processing](https://go.documentation.sas.com/?cdcId=espcdc&cdcVersion=5.2&docsetId=espcases&docsetTarget=p1pyldv5uiyl2wn15ofigbx6qbd1.htm&locale=en) for instructions on installing the SAS ESP processors to Apache NiFi.
     
   * [Apache Kafka](https://hub.docker.com/r/landoop/fast-data-dev/) - I like to use the **landoop/fast-data-dev** image for Apache Kafka as it has a full-fledged Kafak installation that starts up very quickly, it also includes a lot of extras which make it worth running.
   
