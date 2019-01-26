@@ -13,7 +13,7 @@
 */
 
 /* 1. create the cas session*/
-CAS esp_session host="10.104.86.14" SESSOPTS=( caslib=casuser TIMEOUT=99999 LOCALE="en_US");
+CAS esp_session host="<cas controller IP>" SESSOPTS=( caslib=casuser TIMEOUT=99999 LOCALE="en_US");
 
 /* 2. creates the cas lib and sets the connection to ESP */
 proc cas;
@@ -23,7 +23,7 @@ proc cas;
 
 	/* Create a caslib, specify the esp server (note srcType must be "esp") */
 	table.addCaslib
-		dataSource={port=5994,server="10.104.90.199",srcType="esp"}
+		dataSource={port=5994,server="<esp server IP>",srcType="esp"}
 		name="brwsmilib";
 run;
 
