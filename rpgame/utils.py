@@ -44,7 +44,7 @@ def kafka_get_producer():
     return Producer({'bootstrap.servers': kafka_bootstrap_server})
 
 
-kafka_bootstrap_server = '10.0.0.1'
+kafka_bootstrap_server = '10.104.87.86'
 party_topic = 'rpggame_parties'
 player_topic = 'rpggame_players'
 fight_topic = 'rpggame_fights'
