@@ -1,6 +1,8 @@
 # RPG Game Demo
-
+---
 This project provides the various resources which are used to run a demonstration of Real-Time Open Architecture using SAS Event Stream Processing. Below you will find instructions on how to setup many of the components. 
+
+![Image](https://github.com/bsmi021/rpgame2/blob/master/images/001_sas_rpgdemo_integration_architecture.png)
 
 *The intention of this project is not to teach you how to use any of the technologies below, it's strongly advised that you review information from the following links to gain clarity.*
 
@@ -51,3 +53,8 @@ Additionall the *data/models* folder contains the Python ML model file for the *
   
     *Note: you will replace the ADV_HOST parameter with the IP address of the host you're running the containter from, additionally modify the exposed ports per your host port availability.<br>
     `docker run --name rpg_kafka -it -p 2181:2181 -p 8081:8081 -p 8082:8082 -p 8083:8083 -p 9092:9092 -e ADV_HOST=(your host IP) landoop/fast-data-dev` 
+
+
+## ESP Model Design
+![Image](https://github.com/bsmi021/rpgame2/blob/master/images/001_sas_rpgdemo_stream_process.png)
+
