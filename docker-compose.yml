@@ -1,0 +1,24 @@
+version: "2.1"
+services:
+  kafka:
+    image: kafka
+    build: kafka
+    hostname: kafka
+    ports:
+      - "19092:9092"
+      - "13030:3030"
+    restart: always
+    healthcheck:
+      test: exit 0
+
+  nifi:
+    image: nifi
+    build: nifi
+    hostname: nifi
+    ports:
+      - "18080:8080"
+    depends_on:
+      - kafka
+    restart: always
+    healthcheck:
+      test: exit 0
