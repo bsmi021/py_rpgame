@@ -1,3 +1,6 @@
 #!/bin/bash
 
-python -m main
+
+sleep 5
+
+python -m rpgame.main

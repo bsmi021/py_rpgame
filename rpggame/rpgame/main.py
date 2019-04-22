@@ -4,12 +4,13 @@ import os
 from collections import namedtuple
 from multiprocessing import Process
 
-from rpgame import combat, player
-from rpgame.item import Item, ItemSlot
-from rpgame.utils import *
+from .combat import *
+from .player import Player
+from .item import *
+from .utils import *
 
 
-def run_fight_sim(f_fight: combat.Fight, f_send_to_kafka: bool):
+def run_fight_sim(f_fight: Fight, f_send_to_kafka: bool):
     """ Executes the fight logic allowing multiple fights to occur at once"""
     f_producer = None
     if f_send_to_kafka:
@@ -18,8 +19,8 @@ def run_fight_sim(f_fight: combat.Fight, f_send_to_kafka: bool):
 
 
 def main():
-    fight_count = 50
-    send_to_kafka = True
+    fight_count = int(os.getenv('FIGHT_COUNT', 1))
+    send_to_kafka = bool(os.getenv('USE_KAFKA', True))
     kafka_producer = None
 
     print('Starting to process {} fights, please be patient...'.format(fight_count))
@@ -82,7 +83,7 @@ def main():
 
     # create a player record for each player
     for p_data in data:
-        playr = player.Player(player_id=int(p_data.id), name=p_data.name, level=p_data.level)
+        playr = Player(player_id=int(p_data.id), name=p_data.name, level=p_data.level)
         playr.equip_items(items[int(p_data.head) - 1])
         playr.equip_items(items[int(p_data.chest) - 1])
         playr.equip_items(items[int(p_data.shoulders) - 1])
@@ -102,7 +103,7 @@ def main():
     # create parties for the players, players are selected randomly and assigned to a party
     # note that players can only appear in one party per execution of the program
     for i in range(5):
-        party = player.Party('Party')
+        party = Party('Party')
         party.name = party.id  # renaming the party by its ID, don't need a special name for this
         parties.append(party)
         while len(players) > 0 \
@@ -121,7 +122,7 @@ def main():
             Get the fight summary on the screen
     """
     for i in range(fight_count):
-        enemy = combat.get_random_enemy()
+        enemy = get_random_enemy()
         if send_to_kafka:
             kafka_produce_message(kafka_producer, enemy_topic, enemy.get_json_string())
             print('Enemy Registered:\n {0}'.format(enemy.get_json_string()))
@@ -129,7 +130,7 @@ def main():
             print(enemy.get_json_string())
 
         party = parties[random.randint(0, len(parties) - 1)]
-        fight = combat.Fight(party, enemy)
+        fight = Fight(party, enemy)
 
         if send_to_kafka:
             kafka_produce_message(kafka_producer, fight_topic, fight.get_json_string())

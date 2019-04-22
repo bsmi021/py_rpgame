@@ -1,24 +1,40 @@
 version: "2.1"
 services:
-  kafka:
-    image: kafka
-    build: kafka
-    hostname: kafka
-    ports:
-      - "19092:9092"
-      - "13030:3030"
-    restart: always
-    healthcheck:
-      test: exit 0
+  #kafka:
+  #  image: kafka
+  #  build: kafka
+  #  hostname: kafka
+  #  ports:
+  #    - "19092:9092"
+  #    - "13030:3030"
+  #  #restart: always
+  #  healthcheck:
+  #    test: exit 0
 
-  nifi:
-    image: nifi
-    build: nifi
-    hostname: nifi
-    ports:
-      - "18080:8080"
-    depends_on:
-      - kafka
+  #nifi:
+  #  image: nifi
+  #  build: nifi
+  #  hostname: nifi
+  #  ports:
+  #    - "18080:8080"
+  #  depends_on:
+  #    - kafka
+  #  #restart: always
+  #  healthcheck:
+  #    test: exit 0
+
+
+  rpg_game:
+    image: rpggame
+    build: rpggame
+    hostname: rpggame
+    environment:
+      - KAFKA_BOOTSTRAP_SERVER=10.104.87.86:9092
+      - PYTHONPATH=.
+      - FIGHT_COUNT=25
+      - USE_KAFKA=True
+    #depends_on:
+    #  - kafka
     restart: always
     healthcheck:
       test: exit 0

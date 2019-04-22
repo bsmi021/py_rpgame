@@ -7,13 +7,13 @@ WORKDIR /app
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY main.py ./
+COPY rpgame/main.py ./
 COPY run.sh ./
 COPY rpgame/. ./rpgame
-COPY data/. ./data
+COPY rpgame/data ./data
 
 RUN chmod +x ./run.sh
 
-ENV PYTHON_PATH=.
+ENV PYTHONPATH=.
 
 CMD ["./run.sh"]
