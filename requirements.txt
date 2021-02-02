@@ -1,7 +1,7 @@
 appdirs==1.4.3
 avro-python3==1.8.2
 backcall==0.1.0
-bleach==3.0.2
+bleach==3.3.0
 cached-property==1.4.2
 certifi==2018.4.16
 chardet==3.0.4
