@@ -14,7 +14,7 @@ defusedxml==0.5.0
 entrypoints==0.2.3
 Flask==1.0.2
 graphviz==0.10.1
-httpie==0.9.9
+httpie==3.1.0
 idna==2.6
 ipykernel==5.1.0
 ipython==7.1.1
